@@ -1,8 +1,18 @@
+import { Modal } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { Zap, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import Signup from '../../pages/Signup';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+ const [opened, { open, close }] = useDisclosure(false);
+
+
+
+
+
+
 
   return (
     <header className="bg-white border-b border-neutral-100 sticky top-0 z-50">
@@ -31,7 +41,7 @@ export function Header() {
             <button className="px-4 py-2 text-neutral-700 hover:text-primary-600 transition-colors text-sm font-medium">
               Sign In
             </button>
-            <button className="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-semibold shadow-sm">
+            <button variant="default" onClick={open} className="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-semibold shadow-sm">
               Get Started
             </button>
           </div>
@@ -60,7 +70,7 @@ export function Header() {
                 <button className="px-4 py-2 text-neutral-700 hover:text-primary-600 transition-colors font-medium text-left">
                   Sign In
                 </button>
-                <button className="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-sm">
+                <button variant="default" onClick={open} className="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-semibold shadow-sm">
                   Get Started
                 </button>
               </div>
@@ -68,6 +78,11 @@ export function Header() {
           </div>
         )}
       </nav>
+
+        <Modal opened={opened} onClose={close} title="Authentication" size="auto">
+        {/* Modal content */}
+        <Signup/>
+      </Modal>
     </header>
   );
 }
