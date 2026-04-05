@@ -1,1 +1,1 @@
- export const LEVELS = ["beginner", "intermediate", "expert"];
+ export const LEVELS = ["Beginner", "Intermediate", "Expert"];
