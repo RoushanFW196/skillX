@@ -34,21 +34,21 @@ export const registerUser = async (req, res) => {
     const formattedSkillsOffered = [];
 
     for (const skill of skillsOffered) {
-      const skillId = await findOrCreateSkill(skill.name);
+      const skillId = await findOrCreateSkill(skill);
 
       formattedSkillsOffered.push({
         skill: skillId,
-        level: skill.level,
+        level: skill?.level ?? "Beginner",
       });
     }
 
     const formattedskillsToLearn = [];
 
     for (const skill of skillsToLearn) {
-      const skillId = await findOrCreateSkill(skill.name);
+      const skillId = await findOrCreateSkill(skill);
       formattedskillsToLearn.push({
         skill: skillId,
-        level: skill.level,
+        level: skill?.level ?? "Beginner",
       });
     }
 

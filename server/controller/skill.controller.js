@@ -2,7 +2,7 @@ import Skill from "../modals/skill.modal.js";
 
 export async function findOrCreateSkill(skillName) {
   // normalize
-  const normalized = skillName.trim().toLowerCase();
+  const normalized = skillName?.trim().toLowerCase();
 
   // check if exists
   let skill = await Skill.findOne({ name: normalized });
