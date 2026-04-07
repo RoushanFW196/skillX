@@ -1,6 +1,7 @@
 import User from "../modals/user.modal.js";
 import bcrypt from "bcryptjs";
 import { findOrCreateSkill } from "./skill.controller.js";
+import { uploadToCloudinary } from "../utils/upload.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -12,7 +13,6 @@ export const registerUser = async (req, res) => {
       skillsOffered,
       skillsToLearn,
       yearsOfExperience,
-      profilePic,
       phone,
     } = req.body;
 
@@ -25,6 +25,14 @@ export const registerUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
+    }
+
+    let profilePicUrl = null;
+
+    // profile pic
+    if (req?.file) {
+      const result = await uploadToCloudinary(req.file);
+      profilePicUrl = result.secure_url;
     }
 
     // 4. Hash password
@@ -60,7 +68,7 @@ export const registerUser = async (req, res) => {
       skillsOffered: formattedSkillsOffered,
       skillsToLearn: formattedskillsToLearn,
       yearsOfExperience,
-      profilePic,
+      profilePic: profilePicUrl,
       phone,
     });
 
