@@ -42,6 +42,7 @@ const userSchema = new Schema(
     credits: { type: Number, default: 0 },
     ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
+    refreshToken: { type: String }, // Store refresh token for security (optional)
   },
   { timestamps: true },
 );

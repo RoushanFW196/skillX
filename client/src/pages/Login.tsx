@@ -11,16 +11,25 @@ export default function Login({ switchToSignup }: any) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login Data:", form);
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/user/login`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+        credentials: "include", // 🔥 MUST for setting cookies from the server
+      },
+    );
+    const data = await response.json();
+    console.log("Login Response:", data);
   };
 
   return (
     <div className="w-full max-w-md mx-auto">
       {/* Card */}
       <div className="bg-white rounded-2xl shadow-lg p-8 border border-neutral-100">
-        
         {/* Header */}
         <div className="mb-6 text-center">
           <h2 className="text-2xl font-bold text-neutral-900">
@@ -33,7 +42,6 @@ export default function Login({ switchToSignup }: any) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          
           {/* Email */}
           <div>
             <label className="text-sm font-medium text-neutral-700">
@@ -105,14 +113,14 @@ export default function Login({ switchToSignup }: any) {
 
         {/* Footer */}
         <p className="text-sm text-center text-neutral-500 mt-4">
-        Don’t have an account?{" "}
-        <button
-          onClick={switchToSignup}
-          className="text-indigo-600 font-medium hover:underline"
-        >
-          Sign up
-        </button>
-      </p>
+          Don’t have an account?{" "}
+          <button
+            onClick={switchToSignup}
+            className="text-indigo-600 font-medium hover:underline"
+          >
+            Sign up
+          </button>
+        </p>
       </div>
     </div>
   );
