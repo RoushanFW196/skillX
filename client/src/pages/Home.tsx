@@ -2,13 +2,13 @@ import { ArrowRight, Zap, Users, Sparkles, CheckCircle2, Lightbulb, Globe, Hands
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 
-export function Home() {
+export default function Home() {
   const features = [
     {
       icon: <Sparkles className="w-8 h-8" />,
       title: 'Learn Anything',
       description: 'Access diverse skills from a global community of experts and enthusiasts.',
-    },
+     },
     {
       icon: <Handshake className="w-8 h-8" />,
       title: 'Fair Exchange',
