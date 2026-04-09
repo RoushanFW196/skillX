@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
-
-export default function Login({ switchToSignup }: any) {
+import { useNavigate } from "react-router";
+export default function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -13,17 +15,28 @@ export default function Login({ switchToSignup }: any) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/user/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-        credentials: "include", // 🔥 MUST for setting cookies from the server
-      },
-    );
-    const data = await response.json();
-    console.log("Login Response:", data);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/user/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+          credentials: "include", // 🔥 MUST for setting cookies from the server
+        },
+      );
+      const data = await response.json();
+      console.log("Login Response:", data);
+      if (data.success && data.status === 200) {
+        localStorage.setItem("accessToken", data.user.accessToken); // Store token in localStorage
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+    }
+  };
+
+  const handleSwitch = () => {
+    navigate("/auth/signup"); // Navigate to the signup page
   };
 
   return (
@@ -115,7 +128,9 @@ export default function Login({ switchToSignup }: any) {
         <p className="text-sm text-center text-neutral-500 mt-4">
           Don’t have an account?{" "}
           <button
-            onClick={switchToSignup}
+            //onClick={switchToSignup}
+
+            onClick={handleSwitch}
             className="text-indigo-600 font-medium hover:underline"
           >
             Sign up

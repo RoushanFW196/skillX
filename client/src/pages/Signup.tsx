@@ -13,6 +13,7 @@ import {
   hasLength,
   matchesField,
 } from "@mantine/form";
+import { useNavigate } from "react-router";
 
 const MB = 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -78,18 +79,14 @@ export default function Signup({ switchToLogin }: any) {
 
     validateInputOnBlur: true, // validate each field as user leaves it
   });
-
+  const navigate = useNavigate();
   const handleSubmit = async (values: typeof form.values) => {
     // File uploads need multipart/form-data, not JSON
     const body = new FormData();
     body.append("name", values.name);
     body.append("email", values.email);
-    body.append("phone", values.phone);
+
     body.append("password", values.password);
-    body.append("yearsOfExperience", String(values.yearsOfExperience));
-    body.append("skillsOffered", JSON.stringify(values.skillsOffered));
-    body.append("skillsToLearn", JSON.stringify(values.skillsToLearn));
-    if (values.profilePic) body.append("profilePic", values.profilePic);
 
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/user/signup`,
@@ -102,85 +99,77 @@ export default function Signup({ switchToLogin }: any) {
     console.log(data);
   };
 
+  const handleSwitch = () => {
+    navigate("/auth/login"); // Navigate to the login page
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-6">
-        <form onSubmit={form.onSubmit(handleSubmit)} className="space-y-4">
-          <TextInput
-            label="Full Name"
-            placeholder="Enter your name"
-            withAsterisk
-            {...form.getInputProps("name")}
-          />
-          <TextInput
-            label="Email"
-            placeholder="Enter your email"
-            withAsterisk
-            {...form.getInputProps("email")}
-          />
-          <TextInput
-            label="Phone"
-            placeholder="+91 9876543210"
-            withAsterisk
-            {...form.getInputProps("phone")}
-          />
-          <PasswordInput
-            label="Password"
-            placeholder="Min 8 chars, 1 upper, 1 number, 1 special"
-            withAsterisk
-            {...form.getInputProps("password")}
-          />
-          <PasswordInput
-            label="Confirm Password"
-            placeholder="Repeat your password"
-            withAsterisk
-            {...form.getInputProps("confirmPassword")}
-          />
-          <NumberInput
-            label="Years of Experience"
-            placeholder="0–60"
-            min={0}
-            max={60}
-            withAsterisk
-            {...form.getInputProps("yearsOfExperience")}
-          />
-          <MultiSelect
-            label="Skills Offered"
-            placeholder="Pick skills you can teach"
-            data={["React", "Angular", "Vue", "Svelte"]}
-            withAsterisk
-            {...form.getInputProps("skillsOffered")}
-          />
-          <MultiSelect
-            label="Skills to Learn"
-            placeholder="Pick skills you want to learn"
-            data={["Guitar", "React", "Angular", "Vue", "Svelte"]}
-            withAsterisk
-            {...form.getInputProps("skillsToLearn")}
-          />
-          <FileInput
-            clearable
-            label="Profile Picture"
-            placeholder="JPG, PNG or WebP · max 2 MB"
-            accept="image/jpeg,image/png,image/webp"
-            withAsterisk
-            {...form.getInputProps("profilePic")}
-          />
+    <div className="w-full max-w-md mx-auto">
+      {/* Card */}
+      <div className="bg-white rounded-2xl shadow-lg p-8 border border-neutral-100">
+        {/* Header */}
+        <div className="mb-6 text-center">
+          <h2 className="text-2xl font-bold text-neutral-900">
+            Create Account 🚀
+          </h2>
+          <p className="text-sm text-neutral-500 mt-1">
+            Start your journey with SkillSwap
+          </p>
+        </div>
 
-          <Button type="submit" fullWidth>
-            Sign Up
-          </Button>
-        </form>
+        <div className="w-full max-w-lg bg-white rounded-2xl  p-6">
+          <form onSubmit={form.onSubmit(handleSubmit)} className="space-y-4">
+            <TextInput
+              label="Full Name"
+              placeholder="Enter your name"
+              withAsterisk
+              {...form.getInputProps("name")}
+            />
+            <TextInput
+              label="Email"
+              placeholder="Enter your email"
+              withAsterisk
+              {...form.getInputProps("email")}
+            />
 
-        <p className="text-sm text-center text-neutral-500 mt-4">
-          Already have an account?{" "}
-          <button
-            onClick={switchToLogin}
-            className="text-indigo-600 font-medium hover:underline"
-          >
-            Sign in
+            <PasswordInput
+              label="Password"
+              placeholder="Min 8 chars, 1 upper, 1 number, 1 special"
+              withAsterisk
+              {...form.getInputProps("password")}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              className="w-full py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow-md hover:shadow-lg hover:scale-[1.01] transition-all"
+            >
+              Sign Up
+            </Button>
+          </form>
+
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-3">
+            <div className="flex-1 h-px bg-neutral-200" />
+            <span className="text-xs text-neutral-400">OR</span>
+            <div className="flex-1 h-px bg-neutral-200" />
+          </div>
+
+          {/* Social Login */}
+          <button className="w-full border border-neutral-200 py-2.5 rounded-lg text-sm font-medium hover:bg-neutral-50 transition">
+            Continue with Google
           </button>
-        </p>
+
+          <p className="text-sm text-center text-neutral-500 mt-4">
+            Already have an account?{" "}
+            <button
+              onClick={handleSwitch}
+              className="text-indigo-600 font-medium hover:underline"
+            >
+              Sign in
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
