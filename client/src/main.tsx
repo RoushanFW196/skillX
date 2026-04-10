@@ -18,7 +18,7 @@ const Loadable = (Component: any) => (
 const Home = Loadable(lazy(() => import("./pages/Home")));
 const Signup = Loadable(lazy(() => import("./pages/Signup")));
 const Login = Loadable(lazy(() => import("./pages/Login")));
-
+const Profile = Loadable(lazy(() => import("./pages/Profile")));
 const router = createBrowserRouter([
   {
     path: "/",
@@ -38,8 +38,8 @@ const router = createBrowserRouter([
     element: <ProtectedLayout />, // 🔒 protected
     children: [
       // { path: "dashboard", element: <Dashboard /> },
-      // { path: "profile", element: <Profile /> },
-      {path: "test", element: <div>App Not Found</div>},
+      { path: "profile", element: Profile },
+      { path: "test", element: <div>App Not Found</div> },
     ],
   },
 ]);
