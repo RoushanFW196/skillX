@@ -1,7 +1,8 @@
 import { Outlet, Navigate } from "react-router";
+import { Header } from "./Header";
 
 export function ProtectedLayout() {
-  const isLoggedIn = false; // 🔁 replace with real auth
+  const isLoggedIn = true; // 🔁 replace with real auth
 
   if (!isLoggedIn) {
     return <Navigate to="/auth/login" />;
@@ -9,7 +10,7 @@ export function ProtectedLayout() {
 
   return (
     <div>
-      <h1>App Layout</h1>
+      <Header />
       <Outlet />
     </div>
   );
