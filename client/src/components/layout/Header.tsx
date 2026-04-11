@@ -6,9 +6,10 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [isloggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  // 🔥 TEMP: replace with real auth state
+  // // 🔥 TEMP: replace with real auth state
   const user = {
     name: "Roushan",
     avatar: "https://i.pravatar.cc/40",
@@ -58,7 +59,7 @@ export function Header() {
             </div>
 
             <span className="text-xl font-bold tracking-tight text-neutral-900">
-              SkillSwap
+              SkillX
             </span>
           </div>
 
@@ -90,7 +91,7 @@ export function Header() {
             </button>
 
             {/* 👤 If user logged in */}
-            {user ? (
+            {isloggedIn ? (
               <div className="relative">
                 <img
                   src={user.avatar}

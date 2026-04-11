@@ -24,7 +24,7 @@ export default function ProfilePage() {
     phone: "74833337925",
     yearsOfExperience: 3,
     profilePic:
-      "https://res.cloudinary.com/docsqsajw/image/upload/v1775674675/skillSwap/profilePics/nt2hoznoyi5ckq7qc9qi.jpg",
+      "https://res.cloudinary.com/docsqsajw/image/upload/v1775674675/SkillX/profilePics/nt2hoznoyi5ckq7qc9qi.jpg",
     credits: 0,
     ratingAvg: 0,
     ratingCount: 0,
@@ -43,11 +43,7 @@ export default function ProfilePage() {
         {/* HEADER */}
         <Group justify="space-between" align="flex-start">
           <Group>
-            <Avatar
-              src={profile.profilePic}
-              size={80}
-              radius="50%"
-            />
+            <Avatar src={profile.profilePic} size={80} radius="50%" />
 
             <div>
               <Text size="xl" fw={700}>

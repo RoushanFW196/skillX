@@ -29,6 +29,7 @@ export default function Login() {
       console.log("Login Response:", data);
       if (data.success && data.status === 200) {
         localStorage.setItem("accessToken", data.user.accessToken); // Store token in localStorage
+        navigate("/"); // Redirect to dashboard
       }
     } catch (error) {
       console.error("Login Error:", error);
