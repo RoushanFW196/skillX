@@ -6,7 +6,6 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-
   const navigate = useNavigate();
 
   // 🔥 TEMP: replace with real auth state
@@ -28,10 +27,13 @@ export function Header() {
         credentials: "include",
       },
     );
-
+    console.log("response:", response);
     if (response.ok) {
-      navigate("/");
       localStorage.removeItem("accessToken");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 3000);
     } else {
       console.error("Logout failed");
     }
@@ -104,7 +106,7 @@ export function Header() {
                     </div>
 
                     <button
-                      onClick={() => navigate("/profile")}
+                      onClick={() => navigate("/app/profile")}
                       className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-neutral-100  rounded-lg"
                     >
                       <User className="w-4 h-4" />
