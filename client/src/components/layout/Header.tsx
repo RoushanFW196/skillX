@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { Zap, Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
 import { Avatar, Popover } from "@mantine/core";
@@ -20,33 +20,6 @@ export function Header() {
 
   const handleStart = () => {
     navigate("/auth/login");
-  };
-
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      setIsLoggedIn(true);
-      fetchProfile(); // Fetch user profile on app load if token exists
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, []);
-
-  const fetchProfile = async () => {
-    console.log("user", user);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/user/profile/${user?._id}`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
-      const data = await response.json();
-      console.log("Profile Data:", data);
-    } catch (error) {
-      console.error("Profile Fetch Error:", error);
-    }
   };
 
   const handleLogout = async () => {

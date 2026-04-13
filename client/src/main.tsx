@@ -7,6 +7,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
+import ErrorPage from "./errorboundary/Errorpage.js";
 import { AuthLayout } from "./components/layout/AuthLayout.tsx";
 import { ProtectedLayout } from "./components/layout/ProtectedLayout.tsx";
 const Loadable = (Component: any) => (
@@ -36,9 +37,10 @@ const router = createBrowserRouter([
   {
     path: "/app",
     element: <ProtectedLayout />, // 🔒 protected
+    errorElement: <ErrorPage />,
     children: [
       // { path: "dashboard", element: <Dashboard /> },
-      { path: "profile", element: Profile },
+      { path: "profile", element: Profile, errorElement: <ErrorPage /> },
       { path: "test", element: <div>App Not Found</div> },
     ],
   },
