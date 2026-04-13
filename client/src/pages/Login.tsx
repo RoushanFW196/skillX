@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useAtom } from "jotai";
+import { loginAtom, userInfoAtom } from "../store/atom.js";
+
 export default function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
-
+  const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
+  const [user, setUser] = useAtom(userInfoAtom);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,8 +32,10 @@ export default function Login() {
       const data = await response.json();
       console.log("Login Response:", data);
       if (data.success && data.status === 200) {
+        setUser(data.user); // Store user info in Jotai atom
         localStorage.setItem("accessToken", data.user.accessToken); // Store token in localStorage
         navigate("/"); // Redirect to dashboard
+        setIsLoggedIn(true); // Update login state
       }
     } catch (error) {
       console.error("Login Error:", error);

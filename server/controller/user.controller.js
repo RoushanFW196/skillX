@@ -176,3 +176,18 @@ export const refreshAccessToken = async (req, res) => {
     res.status(403).json({ message: "Invalid or expired refresh token" });
   }
 };
+
+
+
+export const  getUserProfile = async (req, res) => {
+  try {
+     const userId = req.params.id; // "123"; // Assuming you have user ID in req.user
+    const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
