@@ -10,7 +10,7 @@ export function Footer() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">SkillSwap</span>
+              <span className="text-xl font-bold text-white">SkillX</span>
             </div>
             <p className="text-neutral-500 mb-6 max-w-md leading-relaxed text-sm">
               A global community where knowledge flows freely. Exchange skills, build connections, and grow together without financial barriers.
@@ -82,7 +82,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-neutral-800 pt-8 text-center text-neutral-600 text-sm">
-          <p>&copy; {new Date().getFullYear()} SkillSwap. All rights reserved. Made with passion.</p>
+          <p>&copy; {new Date().getFullYear()} SkillX. All rights reserved. Made with passion.</p>
         </div>
       </div>
     </footer>

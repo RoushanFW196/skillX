@@ -33,7 +33,7 @@ export const uploadToCloudinary = (file) => {
 
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "skillSwap/profilePics",
+        folder: "SkillX/profilePics",
         resource_type: isPDF ? "raw" : "image",
       },
       (error, result) => {

@@ -8,54 +8,64 @@ import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 
 export const registerUser = async (req, res) => {
   try {
-    // 1. Get data from request
     const { name, email, password } = req.body;
-
-    // 2. Basic validation
+    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 8 characters" });
+    }
     // 3. Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
-    /// will add skills and profile pic later
-    // let profilePicUrl = null;
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // // profile pic
-    // if (req?.file) {
-    //   const result = await uploadToCloudinary(req.file);
-    //   profilePicUrl = result.secure_url;
-    // }
+    // Create user (unique index on email will prevent duplicates)
+    const user = new User({ name, email, password: hashedPassword });
 
-    // 4. Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
 
-    // 5. Create new user
-    const user = new User({
-      name,
-      email,
-      password: hashedPassword,
+    // Store refresh token and save
+    user.refreshToken = refreshToken;
+    const newUser = await user.save();
+
+    // Set cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    const newUser = await user.save();
-    console.log("New user created:", newUser);
-    // 6. Send response (DO NOT send password)
     res.status(201).json({
-      message: "User registered successfully",
       success: true,
-      status: 200,
-      user: {
-        _id: newUser._id,
+      message: "User registered successfully",
+      data: {
+        id: newUser._id,
         name: newUser.name,
         email: newUser.email,
+        accessToken,
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Registration failed" });
   }
 };
 
@@ -164,5 +174,20 @@ export const refreshAccessToken = async (req, res) => {
     res.json({ accessToken: newAccessToken });
   } catch (err) {
     res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+
+
+export const  getUserProfile = async (req, res) => {
+  try {
+     const userId = req.params.id; // "123"; // Assuming you have user ID in req.user
+    const user = await User.findById(userId).select("-password -refreshToken");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

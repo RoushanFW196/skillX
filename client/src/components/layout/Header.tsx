@@ -1,22 +1,52 @@
+import { useAtom } from "jotai";
 import { Zap, Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { loginAtom, userInfoAtom } from "../../store/atom.js";
+import { Avatar, Popover } from "@mantine/core";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-
+  const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
   const navigate = useNavigate();
+  const [user, setUser] = useAtom(userInfoAtom);
 
-  // 🔥 TEMP: replace with real auth state
-  const user = {
-    name: "Roushan",
-    avatar: "https://i.pravatar.cc/40",
-  };
+  // // 🔥 TEMP: replace with real auth state
+  // const user = {
+  //   name: "Roushan",
+  //   avatar: "https://i.pravatar.cc/40",
+  // };
 
   const handleStart = () => {
-    navigate("/auth/signup");
+    navigate("/auth/login");
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setIsLoggedIn(true);
+      fetchProfile(); // Fetch user profile on app load if token exists
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  const fetchProfile = async () => {
+    console.log("user", user);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/user/profile/${user?._id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+      const data = await response.json();
+      console.log("Profile Data:", data);
+    } catch (error) {
+      console.error("Profile Fetch Error:", error);
+    }
   };
 
   const handleLogout = async () => {
@@ -28,10 +58,13 @@ export function Header() {
         credentials: "include",
       },
     );
-
+    console.log("response:", response);
     if (response.ok) {
-      navigate("/");
       localStorage.removeItem("accessToken");
+      setIsLoggedIn(false);
+      setTimeout(() => {
+        navigate("/");
+      }, 3000);
     } else {
       console.error("Logout failed");
     }
@@ -56,7 +89,7 @@ export function Header() {
             </div>
 
             <span className="text-xl font-bold tracking-tight text-neutral-900">
-              SkillSwap
+              SkillX
             </span>
           </div>
 
@@ -88,39 +121,32 @@ export function Header() {
             </button>
 
             {/* 👤 If user logged in */}
-            {user ? (
-              <div className="relative">
-                <img
-                  src={user.avatar}
-                  alt="profile"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="w-9 h-9 rounded-full cursor-pointer border"
-                />
+            {isloggedIn ? (
+              <Popover width={200} position="bottom" withArrow shadow="md">
+                <Popover.Target>
+                  <Avatar
+                    src={user?.avatar || "https://i.pravatar.cc/40"}
+                    alt="it's me"
+                  />
+                </Popover.Target>
+                <Popover.Dropdown>
+                  <button
+                    onClick={() => navigate("/app/profile")}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-neutral-100  rounded-lg"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </button>
 
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-3 w-48 bg-white  border  rounded-xl shadow-lg p-2">
-                    <div className="px-3 py-2 text-sm text-neutral-600 dark:text-neutral-300">
-                      {user.name}
-                    </div>
-
-                    <button
-                      onClick={() => navigate("/profile")}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-neutral-100  rounded-lg"
-                    >
-                      <User className="w-4 h-4" />
-                      Profile
-                    </button>
-
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50  rounded-lg"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50  rounded-lg"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </Popover.Dropdown>
+              </Popover>
             ) : (
               <button
                 onClick={handleStart}

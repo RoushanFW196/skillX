@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getUserProfile,
   loginUser,
   logoutUser,
   registerUser,
@@ -11,5 +12,5 @@ const router = express.Router();
 router.post("/signup", upload.single("profilePic"), registerUser);
 router.post("/login", loginUser);
 router.post("/logout", logoutUser);
-
+router.get("/profile/:id", getUserProfile);
 export default router;
