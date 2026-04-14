@@ -1,11 +1,17 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-const skill = new Schema(
+
+const skillSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: {
+      type: String,
+      required: true,
+      unique: true, // prevent duplicates
+    },
+    category: String,
   },
   { timestamps: true },
 );
 
-const Skill = mongoose.model("Skill", skill);
+const Skill = mongoose.model("Skill", skillSchema);
 export default Skill;

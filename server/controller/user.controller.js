@@ -2,7 +2,6 @@ import User from "../modals/user.modal.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import { findOrCreateSkill } from "./skill.controller.js";
 import { uploadToCloudinary } from "../utils/upload.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 
