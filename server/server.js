@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./db/db.js";
 import userRoutes from "./route/userRoute.js";
+import skillRoutes from "./route/skillRoute.js";
 const PORT = process.env.PORT || 3000;
 
 const app = express();
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 });
 // Base route
 app.use("/api/user", userRoutes);
+app.use("/api/skills", skillRoutes);
 
 console.log("Hello World!");
 

@@ -3,7 +3,7 @@ import { Zap, Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
-import { Avatar, Popover } from "@mantine/core";
+import { Avatar, NavLink, Popover } from "@mantine/core";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,13 +69,12 @@ export function Header() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
             {["Browse Skills", "Community", "About"].map((item) => (
-              <a
-                key={item}
-                href="#"
+              <NavLink
+              key={item}
                 className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
-              >
-                {item}
-              </a>
+                href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
+                label={item}
+              />
             ))}
           </div>
 
