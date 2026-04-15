@@ -14,6 +14,7 @@ import EditProfileModal from "./EditProfileModal.tsx";
 import { useAtom } from "jotai";
 import { loginAtom, userInfoAtom } from "../store/atom.js";
 import { useEffect } from "react";
+import { toast } from "react-toastify";
 export default function ProfilePage() {
   const [opened, setOpened] = useState(false);
   const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
@@ -34,11 +35,52 @@ export default function ProfilePage() {
     // ratingCount: 0,
   });
 
-  const handleSave = (updatedData: any) => {
-    setProfile((prev) => ({
-      ...prev,
-      ...updatedData,
-    }));
+  const handleSave = async (updatedData: any) => {
+    console.log("Updated Profile Data:", updatedData);
+
+    try {
+      if (JSON.stringify(updatedData) === JSON.stringify(profile)) {
+        toast.info("No changes made");
+        return;
+      }
+      const token = localStorage.getItem("accessToken");
+
+      if (!token) {
+        throw new Error("User not authenticated");
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/user/profile`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedData),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update profile");
+      }
+
+      // ✅ Update state ONLY after success
+      setProfile((prev) => ({
+        ...prev,
+        ...updatedData,
+      }));
+
+      // ✅ Toast success
+      toast.success("Profile updated successfully 🎉");
+    } catch (error: any) {
+      console.error("Update Error:", error);
+
+      // ❌ Show error toast
+      toast.error(error.message || "Something went wrong");
+    }
   };
 
   useEffect(() => {

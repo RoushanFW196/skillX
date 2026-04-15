@@ -1,7 +1,8 @@
 import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "@mantine/core/styles.css";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { MantineProvider } from "@mantine/core";
 import App from "./App.tsx";
 import "./index.css";
@@ -57,6 +58,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <MantineProvider>
       <RouterProvider router={router} />
+      <ToastContainer position="top-right" autoClose={2000} />
     </MantineProvider>
   </StrictMode>,
 );
