@@ -1,6 +1,8 @@
 import { TextInput, PasswordInput, Button } from "@mantine/core";
 import { useForm, isEmail, hasLength } from "@mantine/form";
+import { useAtom } from "jotai";
 import { useNavigate } from "react-router";
+import { loginAtom, userInfoAtom } from "../store/atom.js";
 
 export default function Signup() {
   const form = useForm({
@@ -25,6 +27,8 @@ export default function Signup() {
     validateInputOnBlur: true, // validate each field as user leaves it
   });
   const navigate = useNavigate();
+  const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
+  const [user, setUser] = useAtom(userInfoAtom);
 
   const handleSubmit = async (values: typeof form.values) => {
     console.log("Form values:", values);
@@ -34,7 +38,7 @@ export default function Signup() {
         `${import.meta.env.VITE_API_BASE_URL}/user/signup`,
         {
           method: "POST",
-           credentials: "include",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json", // ✅ since no file upload now
           },
@@ -47,6 +51,9 @@ export default function Signup() {
 
       if (response.ok) {
         navigate("/");
+        setIsLoggedIn(true);
+        setUser(data.data); // Store user info in Jotai atom
+        localStorage.setItem("accessToken", data.data.accessToken); // Store token in localStorage
       }
     } catch (err) {
       console.error("Signup error:", err);

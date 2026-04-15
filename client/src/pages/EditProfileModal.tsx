@@ -7,18 +7,18 @@ import {
   Textarea,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useEffect } from "react";
+import { useState,useEffect} from "react";
 
-const skillsList = [
-  "React",
-  "JavaScript",
-  "Node.js",
-  "DSA",
-  "System Design",
-  "Photography",
-  "Cooking",
-  "Guitar",
-];
+// const skillsList = [
+//   "React",
+//   "JavaScript",
+//   "Node.js",
+//   "DSA",
+//   "System Design",
+//   "Photography",
+//   "Cooking",
+//   "Guitar",
+// ];
 
 export default function EditProfileModal({
   opened,
@@ -37,10 +37,29 @@ export default function EditProfileModal({
     validate: {
       name: (value) =>
         value.length < 2 ? "Name must have at least 2 letters" : null,
-      email: (value) =>
-        /^\S+@\S+$/.test(value) ? null : "Invalid email",
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   });
+const [skillsList, setSkillsList] = useState([]);
+    const fetchSkills = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/skills`);
+      const data = await res.json();
+      return data.skills;
+    } catch (err) {
+      console.error(err);
+    }
+  };
+ useEffect(() => {
+  const loadSkills = async () => {
+    const skills = await fetchSkills();
+    const names = skills?.map((skill:any) => skill.name);
+    setSkillsList(names);
+  };
+  loadSkills();
+}, []);
+
+
 
   // Sync form with profile when modal opens
   useEffect(() => {
@@ -70,15 +89,11 @@ export default function EditProfileModal({
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
-          <TextInput label="Name" {...form.getInputProps("name")} />
+          <TextInput label="Name" {...form.getInputProps("name")} disabled />
 
-          <TextInput label="Email" {...form.getInputProps("email")} />
+          <TextInput label="Email" {...form.getInputProps("email")} disabled />
 
-          <Textarea
-            label="Bio"
-            minRows={3}
-            {...form.getInputProps("bio")}
-          />
+          <Textarea label="Bio" minRows={3} {...form.getInputProps("bio")} />
 
           <MultiSelect
             label="Skills Offered"

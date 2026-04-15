@@ -190,3 +190,21 @@ export const  getUserProfile = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.params.id; // "123"; // Assuming you have user ID in req.user
+    const { name, email } = req.body;
+    let profilePicUrl; 
+    if (req.file) {
+      profilePicUrl = await uploadToCloudinary(req.file.path);
+    }   
+
+
+  }  catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+

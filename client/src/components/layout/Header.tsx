@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
 import { Avatar, NavLink, Popover } from "@mantine/core";
+import { toast } from "react-toastify";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,9 +36,10 @@ export function Header() {
     if (response.ok) {
       localStorage.removeItem("accessToken");
       setIsLoggedIn(false);
+      toast.success("Logged out successfully!");
       setTimeout(() => {
         navigate("/");
-      }, 3000);
+      }, 2000);
     } else {
       console.error("Logout failed");
     }
@@ -70,7 +72,7 @@ export function Header() {
           <div className="hidden md:flex items-center gap-8">
             {["Browse Skills", "Community", "About"].map((item) => (
               <NavLink
-              key={item}
+                key={item}
                 className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
                 href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
                 label={item}

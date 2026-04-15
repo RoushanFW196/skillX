@@ -3,6 +3,7 @@ import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useAtom } from "jotai";
 import { loginAtom, userInfoAtom } from "../store/atom.js";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [form, setForm] = useState({
@@ -32,13 +33,19 @@ export default function Login() {
       const data = await response.json();
       console.log("Login Response:", data);
       if (data.success && data.status === 200) {
-        setUser(data.user); // Store user info in Jotai atom
-        localStorage.setItem("accessToken", data.user.accessToken); // Store token in localStorage
-        navigate("/"); // Redirect to dashboard
-        setIsLoggedIn(true); // Update login state
+        setUser(data.user);
+        setIsLoggedIn(true);
+        localStorage.setItem("accessToken", data.user.accessToken);
+        toast.success("Login successful!");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000); // Delay navigation to show toast
+      }else{
+        toast.error(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Login Error:", error);
+      toast.error("Login failed. Please try again.");
     }
   };
 
