@@ -9,48 +9,49 @@ import {
   Divider,
   Grid,
 } from "@mantine/core";
-import { useState } from "react";
+import React, { useState } from "react";
 import EditProfileModal from "./EditProfileModal.tsx";
 import { useAtom } from "jotai";
 import { loginAtom, userInfoAtom } from "../store/atom.js";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+
 export default function ProfilePage() {
   const [opened, setOpened] = useState(false);
   const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
   const [user, setUser] = useAtom(userInfoAtom);
 
-  const [profile, setProfile] = useState({
-    // bio: "Software engineer with a passion for open source.",
-    // skillsOffered: ["React", "JavaScript", "Guitar", "Cooking"],
-    // skillsWanted: ["DSA", "System Design", "Photography", "Hiking"],
-    // name: "Roushan Kumar",
-    // email: "roushan@gmail.com",
-    // phone: "74833337925",
-    // yearsOfExperience: 3,
-    // profilePic:
-    //   "https://res.cloudinary.com/docsqsajw/image/upload/v1775674675/SkillX/profilePics/nt2hoznoyi5ckq7qc9qi.jpg",
-    // credits: 0,
-    // ratingAvg: 0,
-    // ratingCount: 0,
-  });
+  const [profile, setProfile] = useState(null as any);
+
+  const [skillsList, setSkillsList] = useState([]);
+  const fetchSkills = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/skills`);
+      const data = await res.json();
+
+      const modifiedskill = data.skills.map((skill: any) => ({
+        value: skill._id,
+        label: skill.name,
+      }));
+      setSkillsList(modifiedskill);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleSave = async (updatedData: any) => {
-    console.log("Updated Profile Data:", updatedData);
-
     try {
       if (JSON.stringify(updatedData) === JSON.stringify(profile)) {
         toast.info("No changes made");
         return;
       }
       const token = localStorage.getItem("accessToken");
-
       if (!token) {
         throw new Error("User not authenticated");
       }
-
+      const userId = profile._id || user?._id; // Get user ID from profile or Jotai atom
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/user/profile`,
+        `${import.meta.env.VITE_API_BASE_URL}/user/profile/${userId}`,
         {
           method: "PATCH",
           headers: {
@@ -61,16 +62,26 @@ export default function ProfilePage() {
         },
       );
 
-      const data = await response.json();
-
+      const respdata = await response.json();
+      const data = respdata.data;
       if (!response.ok) {
         throw new Error(data.message || "Failed to update profile");
       }
 
       // ✅ Update state ONLY after success
-      setProfile((prev) => ({
-        ...prev,
-        ...updatedData,
+      setProfile(() => ({
+        _id: data._id,
+        bio: data.bio,
+        skillsOffered: data.skillsOffered,
+        skillsToLearn: data.skillsToLearn,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        yearsOfExperience: data.yearsOfExperience,
+        profilePic: data.profilePic,
+        credits: data.credits,
+        ratingAvg: data.ratingAvg,
+        ratingCount: data.ratingCount,
       }));
 
       // ✅ Toast success
@@ -88,6 +99,7 @@ export default function ProfilePage() {
     if (token) {
       setIsLoggedIn(true);
       fetchProfile(); // Fetch user profile on app load if token exists
+      fetchSkills(); // Fetch skills list on app load
     } else {
       setIsLoggedIn(false);
     }
@@ -95,9 +107,8 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     const token = localStorage.getItem("accessToken");
-
     const user = JSON.parse(atob(token?.split(".")[1]));
-
+    setUser(user); // Store user info in Jotai atom for global access
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/user/profile/${user?.id}`,
@@ -111,9 +122,10 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setProfile(() => ({
+          _id: data._id,
           bio: data.bio,
           skillsOffered: data.skillsOffered,
-          skillsWanted: data.skillsWanted,
+          skillsToLearn: data.skillsToLearn,
           name: data.name,
           email: data.email,
           phone: data.phone,
@@ -135,7 +147,13 @@ export default function ProfilePage() {
         {/* HEADER */}
         <Group justify="space-between" align="flex-start">
           <Group>
-            <Avatar src={profile?.profilePic} size={80} radius="50%" />
+            <Avatar
+              src={
+                "https://do6gp1uxl3luu.cloudfront.net/profile_pic/6557b8b100617269655ac74b_1776331486096"
+              }
+              size={80}
+              radius="50%"
+            />
 
             <div>
               <Text size="xl" fw={700}>
@@ -215,8 +233,8 @@ export default function ProfilePage() {
 
             <Group>
               {profile?.skillsOffered?.map((skill) => (
-                <Badge key={skill} size="md" radius="xl">
-                  {skill}
+                <Badge key={skill._id} size="md" radius="xl">
+                  {skill.name}
                 </Badge>
               ))}
             </Group>
@@ -228,15 +246,15 @@ export default function ProfilePage() {
             </Text>
 
             <Group>
-              {profile?.skillsWanted?.map((skill) => (
+              {profile?.skillsToLearn?.map((skill) => (
                 <Badge
-                  key={skill}
+                  key={skill._id}
                   size="md"
                   radius="xl"
                   color="green"
                   variant="light"
                 >
-                  {skill}
+                  {skill.name}
                 </Badge>
               ))}
             </Group>
@@ -245,12 +263,15 @@ export default function ProfilePage() {
       </Card>
 
       {/* MODAL */}
-      <EditProfileModal
-        opened={opened}
-        onClose={() => setOpened(false)}
-        profile={profile}
-        onSave={handleSave}
-      />
+      {opened && (
+        <EditProfileModal
+          opened={opened}
+          onClose={() => setOpened(false)}
+          profile={profile}
+          skillsList={skillsList}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }

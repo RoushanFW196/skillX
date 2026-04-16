@@ -14,30 +14,14 @@ const userSchema = new Schema(
     profilePic: String,
     skillsOffered: [
       {
-        skill: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Skill",
-          required: true,
-        },
-        level: {
-          type: String,
-          enum: LEVELS,
-          required: true,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Skill",
       },
     ],
     skillsToLearn: [
       {
-        skill: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Skill",
-          required: true,
-        },
-        level: {
-          type: String,
-          enum: LEVELS,
-          required: true,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Skill",
       },
     ],
     credits: { type: Number, default: 0 },
