@@ -6,25 +6,17 @@ import {
   MultiSelect,
   Textarea,
 } from "@mantine/core";
+import { useAtom } from "jotai";
+import { userInfoAtom } from "../store/atom.js";
 import { useForm } from "@mantine/form";
-import { useState,useEffect} from "react";
-
-// const skillsList = [
-//   "React",
-//   "JavaScript",
-//   "Node.js",
-//   "DSA",
-//   "System Design",
-//   "Photography",
-//   "Cooking",
-//   "Guitar",
-// ];
+import { useEffect } from "react";
 
 export default function EditProfileModal({
   opened,
   onClose,
   profile,
   onSave,
+  skillsList,
 }: any) {
   const form = useForm({
     initialValues: {
@@ -32,7 +24,7 @@ export default function EditProfileModal({
       bio: "",
       email: "",
       skillsOffered: [],
-      skillsWanted: [],
+      skillsToLearn: [],
     },
     validate: {
       name: (value) =>
@@ -40,26 +32,8 @@ export default function EditProfileModal({
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
     },
   });
-const [skillsList, setSkillsList] = useState([]);
-    const fetchSkills = async () => {
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/skills`);
-      const data = await res.json();
-      return data.skills;
-    } catch (err) {
-      console.error(err);
-    }
-  };
- useEffect(() => {
-  const loadSkills = async () => {
-    const skills = await fetchSkills();
-    const names = skills?.map((skill:any) => skill.name);
-    setSkillsList(names);
-  };
-  loadSkills();
-}, []);
 
-
+  const [user, setUser] = useAtom(userInfoAtom);
 
   // Sync form with profile when modal opens
   useEffect(() => {
@@ -68,8 +42,10 @@ const [skillsList, setSkillsList] = useState([]);
         name: profile.name,
         bio: profile.bio,
         email: profile.email,
-        skillsOffered: profile.skillsOffered,
-        skillsWanted: profile.skillsWanted,
+        skillsOffered:
+          profile.skillsOffered.map((skill: any) => skill._id) || [],
+        skillsToLearn:
+          profile.skillsToLearn.map((skill: any) => skill._id) || [],
       });
     }
   }, [profile]);
@@ -97,7 +73,7 @@ const [skillsList, setSkillsList] = useState([]);
 
           <MultiSelect
             label="Skills Offered"
-            data={skillsList}
+            data={skillsList || []}
             searchable
             clearable
             {...form.getInputProps("skillsOffered")}
@@ -105,10 +81,10 @@ const [skillsList, setSkillsList] = useState([]);
 
           <MultiSelect
             label="Skills Wanted"
-            data={skillsList}
+            data={skillsList || []}
             searchable
             clearable
-            {...form.getInputProps("skillsWanted")}
+            {...form.getInputProps("skillsToLearn")}
           />
 
           <Button type="submit" fullWidth mt="md">

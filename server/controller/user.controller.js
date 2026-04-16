@@ -176,12 +176,13 @@ export const refreshAccessToken = async (req, res) => {
   }
 };
 
-
-
-export const  getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res) => {
   try {
-     const userId = req.params.id; // "123"; // Assuming you have user ID in req.user
-    const user = await User.findById(userId).select("-password -refreshToken");
+    const userId = req.params.id; // "123"; // Assuming you have user ID in req.user
+    const user = await User.findById(userId)
+      .populate("skillsOffered")
+      .populate("skillsToLearn")
+      .select("-password -refreshToken");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -191,20 +192,66 @@ export const  getUserProfile = async (req, res) => {
   }
 };
 
-
-
 export const updateUserProfile = async (req, res) => {
+
   try {
-    const userId = req.params.id; // "123"; // Assuming you have user ID in req.user
-    const { name, email } = req.body;
-    let profilePicUrl; 
-    if (req.file) {
-      profilePicUrl = await uploadToCloudinary(req.file.path);
-    }   
+    const userId = req.params.id;
 
+    // ✅ Allowed fields (important for security)
+    const allowedFields = [
+      "name",
+      "email",
+      "bio",
+      "skillsOffered",
+      "skillsToLearn",
+      "profilePic",
+    ];
 
-  }  catch (error) {
-    res.status(500).json({ message: error.message });
+    const updates = {};
+
+    // ✅ Filter only allowed fields
+    Object.keys(req.body).forEach((key) => {
+      if (allowedFields.includes(key)) {
+        updates[key] = req.body[key];
+      }
+    });
+
+    // ❗ Optional: prevent empty updates
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields provided for update",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updates }, // ✅ correct usage
+      {
+        new: true,
+        runValidators: true,
+        context: "query",
+      },
+    )
+      .populate("skillsOffered")
+      .populate("skillsToLearn")
+      .select("-password -refreshToken");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
-}
-
+};
