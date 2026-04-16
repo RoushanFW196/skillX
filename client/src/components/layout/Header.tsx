@@ -1,10 +1,11 @@
 import { useAtom } from "jotai";
 import { Zap, Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
 import { Avatar, NavLink, Popover } from "@mantine/core";
 import { toast } from "react-toastify";
+import { fetchUserInfo } from "../../utils/commonfunction.js";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -13,14 +14,30 @@ export function Header() {
   const navigate = useNavigate();
   const [user, setUser] = useAtom(userInfoAtom);
 
-  // // 🔥 TEMP: replace with real auth state
-  // const user = {
-  //   name: "Roushan",
-  //   avatar: "https://i.pravatar.cc/40",
-  // };
-
   const handleStart = () => {
     navigate("/auth/login");
+  };
+
+  // after page reload, check if user is still logged in (e.g., by checking localStorage or making an API call)
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setIsLoggedIn(true);
+      // Optionally, fetch user info here and set it in the global state
+      fetchUser();
+    }
+  }, [setIsLoggedIn]);
+
+  const fetchUser = async () => {
+    const token = localStorage.getItem("accessToken");
+    try {
+      const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
+      const data = await fetchUserInfo(decodedUser?.id);
+
+      setUser(data);
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
   };
 
   const handleLogout = async () => {
@@ -32,7 +49,6 @@ export function Header() {
         credentials: "include",
       },
     );
-    console.log("response:", response);
     if (response.ok) {
       localStorage.removeItem("accessToken");
       setIsLoggedIn(false);
@@ -99,7 +115,7 @@ export function Header() {
               <Popover width={200} position="bottom" withArrow shadow="md">
                 <Popover.Target>
                   <Avatar
-                    src={user?.avatar || "https://i.pravatar.cc/40"}
+                    src={user?.profilePic || "https://i.pravatar.cc/40"}
                     alt="it's me"
                   />
                 </Popover.Target>

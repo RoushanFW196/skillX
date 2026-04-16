@@ -24,6 +24,8 @@ import {
   Cake,
   Waves,
 } from "lucide-react";
+import { fetchUserInfo } from "../utils/commonfunction.js";
+import { FileButton, ActionIcon, Loader } from "@mantine/core";
 import EditProfileModal from "./EditProfileModal.tsx";
 import { useAtom } from "jotai";
 import { loginAtom, userInfoAtom } from "../store/atom.js";
@@ -35,7 +37,7 @@ export default function ProfilePage() {
   const [user, setUser] = useAtom(userInfoAtom);
   const [profile, setProfile] = useState(null as any);
   const [skillsList, setSkillsList] = useState([]);
-
+  const [uploading, setUploading] = useState(false);
   // Mock icon mapping for skills - in a real app, you might store icon names in DB
   const getSkillIcon = (name: string) => {
     const n = name.toLowerCase();
@@ -96,29 +98,63 @@ export default function ProfilePage() {
     const token = localStorage.getItem("accessToken");
     if (token) {
       setIsLoggedIn(true);
-      fetchProfile();
+      fetchUser();
       fetchSkills();
     } else {
       setIsLoggedIn(false);
     }
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchUser = async () => {
     const token = localStorage.getItem("accessToken");
-    const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
-    setUser(decodedUser);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/user/profile/${decodedUser?.id}`,
-        { method: "GET", credentials: "include" },
-      );
-      const respdata = await response.json();
-      if (response.ok) setProfile(respdata.data);
+      const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
+      const data = await fetchUserInfo(decodedUser?.id);
+      console.log("Fetched user info in header:", data);
+      setUser(data);
+      setProfile(data); // Set profile state with fetched user info
     } catch (error) {
-      console.error("Profile Fetch Error:", error);
+      console.error("Error fetching user info:", error);
     }
   };
 
+  const handleUpload = async (file: File | null) => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("profilePic", file); // Ensure "profilePic" matches your backend field name
+
+    setUploading(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      const userId = profile._id || user?._id;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/user/profile/upload-pic/${userId}`,
+        {
+          method: "POST", // Or PATCH, depending on your API
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        },
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        // Update the profile state with the new image URL returned by the server
+        setProfile({ ...profile, profilePic: result.data.profilePic });
+        setUser(result.data); // Update user info in global state if needed
+        toast.success("Photo updated! 📸");
+      } else {
+        throw new Error(result.message || "Upload failed");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
   return (
     <div className="max-w-5xl mx-auto p-6">
       <Card
@@ -135,18 +171,45 @@ export default function ProfilePage() {
         {/* HEADER */}
         <Group justify="space-between" align="center">
           <Group gap="xl">
-            <Avatar
-              src={
-                profile?.profilePic ||
-                "https://do6gp1uxl3luu.cloudfront.net/profile_pic/6557b8b100617269655ac74b_1776331486096"
-              }
-              size={110}
-              radius="100%"
-              style={{
-                border: "4px solid white",
-                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-              }}
-            />
+            <Box style={{ position: "relative" }}>
+              <FileButton onChange={handleUpload} accept="image/png,image/jpeg">
+                {(props) => (
+                  <Avatar
+                    {...props}
+                    src={
+                      profile?.profilePic ||
+                      "https://do6gp1uxl3luu.cloudfront.net/profile_pic/6557b8b100617269655ac74b_1776331486096"
+                    }
+                    size={110}
+                    radius="100%"
+                    style={{
+                      cursor: "pointer",
+                      border: "4px solid white",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                      transition: "filter 0.3s",
+                    }}
+                    className="hover:brightness-90"
+                  />
+                )}
+              </FileButton>
+
+              {/* SHOW LOADER OVER AVATAR DURING UPLOAD */}
+              {uploading && (
+                <Box
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "rgba(255,255,255,0.5)",
+                    borderRadius: "100%",
+                  }}
+                >
+                  <Loader size="sm" />
+                </Box>
+              )}
+            </Box>
 
             <Stack gap={2}>
               <Text size="26px" fw={800} c="#1e293b">

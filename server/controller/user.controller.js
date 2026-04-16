@@ -193,7 +193,6 @@ export const getUserProfile = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
-
   try {
     const userId = req.params.id;
 
@@ -254,5 +253,26 @@ export const updateUserProfile = async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+};
+
+export const updateUserProfilePic = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const result = await uploadToCloudinary(req.file);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: result.secure_url },
+      { new: true },
+    ).select("-password -refreshToken");
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

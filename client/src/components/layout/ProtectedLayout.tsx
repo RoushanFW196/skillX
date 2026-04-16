@@ -1,5 +1,5 @@
 import { Outlet, Navigate } from "react-router";
-import { Header } from "./Header";
+import { Header } from "./Header.tsx";
 
 export function ProtectedLayout() {
   const isLoggedIn = true; // 🔁 replace with real auth
