@@ -5,6 +5,7 @@ import {
   Stack,
   MultiSelect,
   Textarea,
+  NumberInput,
 } from "@mantine/core";
 import { useAtom } from "jotai";
 import { userInfoAtom } from "../store/atom.js";
@@ -23,6 +24,7 @@ export default function EditProfileModal({
       name: "",
       bio: "",
       email: "",
+      yearsOfExperience: 0,
       skillsOffered: [],
       skillsToLearn: [],
     },
@@ -30,6 +32,10 @@ export default function EditProfileModal({
       name: (value) =>
         value.length < 2 ? "Name must have at least 2 letters" : null,
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      yearsOfExperience: (value) =>
+        value < 0 || value > 60
+          ? "Experience must be between 0 and 60 years"
+          : null,
     },
   });
 
@@ -42,6 +48,7 @@ export default function EditProfileModal({
         name: profile.name,
         bio: profile.bio,
         email: profile.email,
+        yearsOfExperience: profile.yearsOfExperience,
         skillsOffered:
           profile.skillsOffered.map((skill: any) => skill._id) || [],
         skillsToLearn:
@@ -69,7 +76,20 @@ export default function EditProfileModal({
 
           <TextInput label="Email" {...form.getInputProps("email")} disabled />
 
-          <Textarea label="Bio" minRows={3} {...form.getInputProps("bio")} />
+          <NumberInput
+            placeholder="Years of experience"
+            label="Years of Experience"
+            {...form.getInputProps("yearsOfExperience")}
+            min={0}
+            max={60}
+          />
+
+          <Textarea
+            label="Bio"
+            minRows={3}
+            {...form.getInputProps("bio")}
+            maxLength={250}
+          />
 
           <MultiSelect
             label="Skills Offered"

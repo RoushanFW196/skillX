@@ -202,6 +202,7 @@ export const updateUserProfile = async (req, res) => {
       "name",
       "email",
       "bio",
+      "yearsOfExperience",
       "skillsOffered",
       "skillsToLearn",
       "profilePic",
