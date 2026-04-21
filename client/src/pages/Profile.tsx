@@ -176,10 +176,7 @@ export default function ProfilePage() {
                 {(props) => (
                   <Avatar
                     {...props}
-                    src={
-                      profile?.profilePic ||
-                      "https://do6gp1uxl3luu.cloudfront.net/profile_pic/6557b8b100617269655ac74b_1776331486096"
-                    }
+                    src={profile?.profilePic || null}
                     size={110}
                     radius="100%"
                     style={{

@@ -115,7 +115,7 @@ export function Header() {
               <Popover width={200} position="bottom" withArrow shadow="md">
                 <Popover.Target>
                   <Avatar
-                    src={user?.profilePic || "https://i.pravatar.cc/40"}
+                    src={user?.profilePic ||null}
                     alt="it's me"
                   />
                 </Popover.Target>
