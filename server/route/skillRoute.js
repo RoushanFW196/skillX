@@ -1,5 +1,5 @@
 import express from "express";
-import Skill from "../modals/skill.modal.js";
+import {Skill} from "../modals/skill.modal.js";
 
 const router = express.Router();
 
