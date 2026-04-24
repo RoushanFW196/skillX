@@ -4,7 +4,7 @@ import { Modal, TextInput, Select, Button, Stack } from "@mantine/core";
 export default function AddSkillModal({ opened, onClose, onAdd, categories }) {
   const [form, setForm] = useState({
     name: "",
-    category: "",
+    categorySlug: "",
   });
 
   const handleChange = (field, value) => {
@@ -13,12 +13,12 @@ export default function AddSkillModal({ opened, onClose, onAdd, categories }) {
 
   const handleSubmit = () => {
     // basic validation
-    if (!form.name || !form.category) return;
+    if (!form.name || !form.categorySlug) return;
     onAdd(form);
     // reset form
     setForm({
       name: "",
-      category: "",
+      categorySlug: "",
     });
     onClose();
   };
@@ -41,8 +41,8 @@ export default function AddSkillModal({ opened, onClose, onAdd, categories }) {
             value: c.slug,
             label: c.name,
           }))}
-          value={form.category}
-          onChange={(value) => handleChange("category", value)}
+          value={form.categorySlug}
+          onChange={(value) => handleChange("categorySlug", value)}
           required
         />
 

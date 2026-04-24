@@ -1,37 +1,16 @@
 import express from "express";
-import {Skill} from "../modals/skill.modal.js";
+import { Skill } from "../modals/skill.modal.js";
+import {
+  createSkill,
+  getSkillsByCategory,
+  getAllSkills,
+} from "../controller/skill.controller.js";
 
 const router = express.Router();
+router.get("/", getSkillsByCategory);
 
-router.get("", async (req, res) => {
-  const skills = await Skill.find().sort({ createdAt: -1 });
-  res.json({skills,message: "Skills fetched successfully" });
-});
+router.get("/all", getAllSkills);
 
-router.post("", async (req, res) => {
-  try {
-    const { name, category } = req.body;
-
-    // prevent duplicate skills
-    const existing = await Skill.findOne({
-      name: name.toLowerCase(),
-    });
-
-    if (existing) {
-      return res.status(400).json({
-        message: "Skill already exists",
-      });
-    }
-
-    const newSkill = await Skill.create({
-      name: name.toLowerCase(),
-      category,
-    });
-
-    res.status(201).json({newSkill,message: "Skill created successfully"  });
-  } catch (err) {
-    res.status(500).json({ message: "Error creating skill" });
-  }
-});
+router.post("/new-skill", createSkill);
 
 export default router;

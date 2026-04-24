@@ -50,7 +50,7 @@ export default function ProfilePage() {
 
   const fetchSkills = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/skills`);
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/skills/all`);
       const data = await res.json();
       const modifiedskill = data.skills.map((skill: any) => ({
         value: skill._id,

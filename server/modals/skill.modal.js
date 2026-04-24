@@ -13,6 +13,7 @@ const categorySchema = new Schema(
       type: String,
       unique: true,
       lowercase: true,
+      index: true
     },
     icon: String, // optional (for UI)
   },
@@ -29,11 +30,7 @@ const skillSchema = new Schema(
       trim: true,
     },
 
-    slug: {
-      type: String,
-      lowercase: true,
-    },
-
+    slug: { type: String, lowercase: true, unique: true, index: true },
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",

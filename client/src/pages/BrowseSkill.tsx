@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Title,
@@ -20,6 +20,7 @@ import {
 import { IconSearch, IconPlus } from "@tabler/icons-react";
 import { categories } from "../utils/constant.js";
 import AddSkillModal from "./AddSkillModal.js";
+import { toast } from "react-toastify";
 
 function SkillCard({ skill }) {
   return (
@@ -39,11 +40,8 @@ function SkillCard({ skill }) {
       <Group mb="sm">
         <Avatar radius="xl" />
         <div>
-          <Text size="sm" fw={600}>
-            {skill.user}
-          </Text>
           <Text size="xs" c="dimmed">
-            {skill.learners} learners
+            {skill.teacherCount}
           </Text>
         </div>
       </Group>
@@ -52,15 +50,7 @@ function SkillCard({ skill }) {
         {skill.name}
       </Text>
 
-      <Group mt="xs">
-        <Rating value={skill.rating} fractions={2} readOnly size="sm" />
-        <Text size="xs">{skill.rating}</Text>
-      </Group>
-
       <Group mt="md" justify="space-between">
-        <Badge color="green" variant="light">
-          {skill.price} credits/hr
-        </Badge>
         <Button size="xs" radius="md">
           View
         </Button>
@@ -73,12 +63,49 @@ export default function SkillPage() {
   const [activeTab, setActiveTab] = useState(categories[0].slug);
   const [search, setSearch] = useState("");
   const [opened, setOpened] = useState(false);
-  const currentCategory = categories.find((cat) => cat.slug === activeTab);
+  const [allSkills, setAllSkills] = useState([]);
+
+  useEffect(() => {
+    getAllSkills();
+  }, [activeTab]);
 
   const filteredSkills =
-    currentCategory?.skills?.filter((skill) =>
+    allSkills?.filter((skill) =>
       skill.name.toLowerCase().includes(search.toLowerCase()),
     ) || [];
+
+  const handleAddSkill = async (newSkill) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/skills/new-skill`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSkill),
+      },
+    );
+
+    if (response.ok) {
+      const createdSkill = await response.json();
+      console.log("Created Skill:", createdSkill);
+      toast.success("Skill added successfully!");
+      getAllSkills();
+    } else {
+      console.error("Failed to add skill");
+    }
+  };
+
+  const getAllSkills = async () => {
+    // fetch all skills from all categories  from the backend and return as a single array
+
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/skills?category=${activeTab}`,
+    );
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Fetched Skills:", data);
+      setAllSkills(data.skills);
+    }
+  };
 
   return (
     <Container size="lg" py="xl">
@@ -86,7 +113,7 @@ export default function SkillPage() {
       <Group justify="space-between" mb="lg">
         <div>
           <Title order={2}>Explore Skills</Title>
-          <Text c="dimmed">Learn from experts or teach others</Text>
+          <Text c="dimmed">Learn from experts</Text>
         </div>
 
         <Button
@@ -156,20 +183,7 @@ export default function SkillPage() {
         opened={opened}
         onClose={() => setOpened(false)}
         categories={categories}
-        onAdd={(newSkill) => {
-          console.log("New Skill:", newSkill);
-
-          // // 🔥 TEMP: local update (replace with API later)
-          // const category = categories.find((c) => c.slug === newSkill.category);
-          // if (category) {
-          //   category.skills.push({
-          //     ...newSkill,
-          //     user: "You",
-          //     learners: 0,
-          //     rating: 0,
-          //   });
-          // }
-        }}
+        onAdd={handleAddSkill}
       />
     </Container>
   );
