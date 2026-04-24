@@ -23,20 +23,46 @@ export const createSkill = async (req, res) => {
   }
 };
 
+export const getAllSkills = async (req, res) => {
+  try {
+    const skills = await Skill.find().populate("category", "name slug");
+    res.status(200).json({ skills, message: "Skills retrieved successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 export const getSkillsByCategory = async (req, res) => {
   try {
-    const { slug } = req.query;
-
-    const category = await Category.findOne({ slug });
-
-    if (!category) {
+    const slug = req.query.category;
+    const cat = await Category.findOne({ slug });
+    if (!cat) {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const skills = await Skill.find({ category: category._id });
+    const skills = await Skill.aggregate([
+      {
+        $match: { category: cat._id },
+      },
+      {
+        $lookup: {
+          from: "userskills",
+          localField: "_id",
+          foreignField: "skill",
+          as: "teachers",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          categoryId: "$category",
+          teacherCount: { $size: "$teachers" },
+        },
+      },
+    ]);
 
-    res.json(skills);
+    res.status(201).json({ skills, message: "Skills retrieved successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

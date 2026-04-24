@@ -1,7 +1,7 @@
 import User from "../modals/user.modal.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
+import { UserSkill } from "../modals/skill.modal.js";
 import { uploadToCloudinary } from "../utils/upload.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
 
@@ -196,7 +196,7 @@ export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    // ✅ Allowed fields (important for security)
+    // ✅ Allowed fields
     const allowedFields = [
       "name",
       "email",
@@ -216,7 +216,6 @@ export const updateUserProfile = async (req, res) => {
       }
     });
 
-    // ❗ Optional: prevent empty updates
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({
         success: false,
@@ -224,16 +223,71 @@ export const updateUserProfile = async (req, res) => {
       });
     }
 
+    // 🔥 ================================
+    // 🔥 Sync skillsOffered → UserSkill
+    // 🔥 ================================
+
+    if (updates.skillsOffered) {
+      const skills = updates.skillsOffered;
+
+      // 🧠 Handle both formats:
+      // ["skillId1", "skillId2"]
+      // OR [{ skillId, pricePerHour, experienceYears }]
+
+      const skillIds = skills.map((s) =>
+        typeof s === "string" ? s : s.skillId,
+      );
+
+      console.log("Updating skillsOffered for user", userId);
+      console.log("Received skills:", skills);
+      console.log("Extracted skill IDs:", skillIds);
+      // ❌ Remove skills that user deleted
+      await UserSkill.deleteMany({
+        user: userId,
+        skill: { $nin: skillIds },
+      });
+
+      // ✅ Add / Update skills
+      const operations = skills.map((s) => {
+        const skillId = typeof s === "string" ? s : s.skillId;
+
+        return {
+          updateOne: {
+            filter: {
+              user: userId,
+              skill: skillId,
+            },
+            update: {
+              $set: {
+                pricePerHour: s.pricePerHour || 0,
+                experienceYears: s.experienceYears || 0,
+              },
+            },
+            upsert: true,
+          },
+        };
+      });
+
+      console.log("Bulk operations for UserSkill:", operations);
+      if (operations.length > 0) {
+        await UserSkill.bulkWrite(operations);
+      }
+    }
+
+    // 🔥 ================================
+    // 🔥 Update User Document
+    // 🔥 ================================
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $set: updates }, // ✅ correct usage
+      { $set: updates },
       {
         new: true,
         runValidators: true,
         context: "query",
       },
     )
-      .populate("skillsOffered")
+      .populate("skillsOffered") // only if ref exists
       .populate("skillsToLearn")
       .select("-password -refreshToken");
 
@@ -246,9 +300,12 @@ export const updateUserProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
+      message: "Profile updated successfully",
       data: updatedUser,
     });
   } catch (error) {
+    console.error("Update Profile Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,

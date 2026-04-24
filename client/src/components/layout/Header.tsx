@@ -86,14 +86,16 @@ export function Header() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {["Browse Skills", "Community", "About"].map((item) => (
-              <NavLink
-                key={item}
-                className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
-                href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
-                label={item}
-              />
-            ))}
+            {["Browse Skills", "Matches", "Community", "About"].map(
+              (item) => (
+                <NavLink
+                  key={item}
+                  className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
+                  href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
+                  label={item}
+                />
+              ),
+            )}
           </div>
 
           {/* Right Section */}
@@ -114,10 +116,7 @@ export function Header() {
             {isloggedIn ? (
               <Popover width={200} position="bottom" withArrow shadow="md">
                 <Popover.Target>
-                  <Avatar
-                    src={user?.profilePic ||null}
-                    alt="it's me"
-                  />
+                  <Avatar src={user?.profilePic || null} alt="it's me" />
                 </Popover.Target>
                 <Popover.Dropdown>
                   <button
