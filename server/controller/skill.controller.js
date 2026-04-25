@@ -1,4 +1,4 @@
-import { Category, Skill } from "../modals/skill.modal.js";
+import { Category, Skill, UserSkill } from "../modals/skill.modal.js";
 
 export const createSkill = async (req, res) => {
   try {
@@ -21,6 +21,21 @@ export const createSkill = async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
+};
+export const getUsersForSkill = async (req, res) => {
+  try {
+    const skillId = req.params.skillid; 
+    const skill = await Skill.findById(skillId);
+
+    if (!skill) {
+      return res.status(404).json({ message: "Skill not found" });
+    } 
+    const users = await UserSkill.find({ skill: skillId }).populate("user");
+
+    res.status(200).json({ users, message: "Users retrieved successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  } 
 };
 
 export const getAllSkills = async (req, res) => {

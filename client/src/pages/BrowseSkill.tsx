@@ -5,14 +5,11 @@ import {
   Text,
   Tabs,
   Card,
-  Badge,
   Group,
   ScrollArea,
   Button,
   SimpleGrid,
   TextInput,
-  Avatar,
-  Rating,
   Stack,
   Center,
 } from "@mantine/core";
@@ -21,38 +18,54 @@ import { IconSearch, IconPlus } from "@tabler/icons-react";
 import { categories } from "../utils/constant.js";
 import AddSkillModal from "./AddSkillModal.js";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 function SkillCard({ skill }) {
+  const navigate = useNavigate();
+
+  const handleSkillClick = () => {
+    navigate(`/app/skills/${skill._id}`);
+  };
+
   return (
     <Card
       shadow="sm"
       radius="xl"
       p="md"
       withBorder
-      style={{ transition: "0.2s", cursor: "pointer" }}
+      style={{
+        transition: "all 0.2s ease",
+        cursor: "pointer",
+      }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-6px)";
+        e.currentTarget.style.transform = "translateY(-4px)";
+        e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.08)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0px)";
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.boxShadow = "";
       }}
     >
-      <Group mb="sm">
-        <Avatar radius="xl" />
-        <div>
-          <Text size="xs" c="dimmed">
-            {skill.teacherCount}
-          </Text>
-        </div>
-      </Group>
+      <Group justify="space-between" align="flex-start">
+        <Group>
+          <div>
+            <Text fw={600} size="lg">
+              {skill.name}
+            </Text>
 
-      <Text fw={600} mt="xs" size="lg">
-        {skill.name}
-      </Text>
+            <Text size="sm" c="dimmed">
+              {skill.teacherCount} Mentor
+            </Text>
+          </div>
+        </Group>
 
-      <Group mt="md" justify="space-between">
-        <Button size="xs" radius="md">
-          View
+        <Button
+          variant="light"
+          radius="xl"
+          size="xs"
+          onClick={handleSkillClick}
+        >
+          View →
         </Button>
       </Group>
     </Card>
@@ -127,7 +140,12 @@ export default function SkillPage() {
 
       {/* 🔹 Categories (Scrollable) */}
       <ScrollArea scrollbarSize={4} offsetScrollbars>
-        <Tabs value={activeTab} onChange={setActiveTab}>
+        <Tabs
+          value={activeTab}
+          onChange={setActiveTab}
+          color="indigo"
+          variant="pills"
+        >
           <Tabs.List
             style={{
               flexWrap: "nowrap",
