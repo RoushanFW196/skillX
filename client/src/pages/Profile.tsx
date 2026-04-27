@@ -50,7 +50,9 @@ export default function ProfilePage() {
 
   const fetchSkills = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/skills/all`);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/skills/all`,
+      );
       const data = await res.json();
       const modifiedskill = data.skills.map((skill: any) => ({
         value: skill._id,
@@ -110,7 +112,7 @@ export default function ProfilePage() {
     try {
       const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
       const data = await fetchUserInfo(decodedUser?.id);
-      console.log("Fetched user info in header:", data);
+    //  console.log("Fetched user info in header:", data);
       setUser(data);
       setProfile(data); // Set profile state with fetched user info
     } catch (error) {
@@ -242,7 +244,7 @@ export default function ProfilePage() {
 
         {/* BIO */}
         <Text mt={25} size="lg" c="#475569" fw={500}>
-          a {profile?.bio || "software engineer"}
+          {profile?.bio}
         </Text>
 
         {/* STATS SECTION */}

@@ -31,7 +31,7 @@ export default function Login() {
         },
       );
       const data = await response.json();
-      console.log("Login Response:", data);
+    //  console.log("Login Response:", data);
       if (data.success && data.status === 200) {
         setUser(data.user);
         setIsLoggedIn(true);
