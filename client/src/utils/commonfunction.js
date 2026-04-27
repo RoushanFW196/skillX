@@ -5,11 +5,11 @@ export const fetchUserInfo = async (userId) => {
       { method: "GET", credentials: "include" },
     );
     const respdata = await response.json();
-    console.log("User info response:", respdata);
+ //   console.log("User info response:", respdata);
     if (response.ok) {
       return respdata.data; // Return user info for local use if needed
     } else {
-      console.error("Failed to fetch user info");
+     // console.error("Failed to fetch user info");
       throw new Error(respdata.message || "Failed to fetch user info");
     }
   } catch (error) {

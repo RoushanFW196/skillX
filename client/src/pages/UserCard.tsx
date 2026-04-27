@@ -11,6 +11,8 @@ import {
   Stack,
   Box,
 } from "@mantine/core";
+import { useAtom } from "jotai";
+import { userInfoAtom } from "../store/atom.js";
 import {
   IconHeart,
   IconStar,
@@ -18,10 +20,43 @@ import {
   IconMessageCircle,
   IconBriefcase,
 } from "@tabler/icons-react";
+import { useNavigate } from "react-router";
 
 function UserCard({ user }) {
   const profilePic =
     user?.user?.profilePic || "https://via.placeholder.com/300";
+
+  const [loggedinuser, setloggedinUser] = useAtom(userInfoAtom);
+ const navigate = useNavigate();
+
+
+
+  // console.log("Logged in user in UserCard:", loggedinuser);
+  const handleChat = async () => {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/conversations/create`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senderId: loggedinuser._id, // student's user ID (current logged in user)
+          receiverId: user.user._id, // teacher's user ID which can teach the skill the student wants to learn
+        }),
+      },
+    );
+   // console.log("Chat creation response:", response);
+    if (response.ok) {
+      const data = await response.json();
+     // console.log("Chat created successfully:", data);
+      // Optionally, navigate to the chat page or show a success message
+      navigate(`/app/chat/${data._id}`);
+    } else {
+      console.error("Failed to create chat");
+      // Optionally, show an error message to the user
+    }
+  };
 
   return (
     <Card shadow="sm" radius="xl" p={0} withBorder mb="lg">
@@ -129,6 +164,7 @@ function UserCard({ user }) {
               variant="light"
               color="blue"
               leftSection={<IconMessageCircle size={16} />}
+              onClick={handleChat}
             >
               Chat
             </Button>

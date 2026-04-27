@@ -31,7 +31,7 @@ export default function Signup() {
   const [user, setUser] = useAtom(userInfoAtom);
 
   const handleSubmit = async (values: typeof form.values) => {
-    console.log("Form values:", values);
+   // console.log("Form values:", values);
 
     try {
       const response = await fetch(
@@ -47,7 +47,7 @@ export default function Signup() {
       );
 
       const data = await response.json();
-      console.log("Response:", data);
+    //  console.log("Response:", data);
 
       if (response.ok) {
         navigate("/");

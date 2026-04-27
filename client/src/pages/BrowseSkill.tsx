@@ -99,7 +99,7 @@ export default function SkillPage() {
 
     if (response.ok) {
       const createdSkill = await response.json();
-      console.log("Created Skill:", createdSkill);
+     // console.log("Created Skill:", createdSkill);
       toast.success("Skill added successfully!");
       getAllSkills();
     } else {

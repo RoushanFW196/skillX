@@ -112,7 +112,7 @@ export default function ProfilePage() {
     try {
       const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
       const data = await fetchUserInfo(decodedUser?.id);
-      console.log("Fetched user info in header:", data);
+    //  console.log("Fetched user info in header:", data);
       setUser(data);
       setProfile(data); // Set profile state with fetched user info
     } catch (error) {

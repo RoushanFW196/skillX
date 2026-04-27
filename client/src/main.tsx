@@ -25,6 +25,8 @@ const Profile = Loadable(lazy(() => import("./pages/Profile")));
 const ExploreSkills = Loadable(lazy(() => import("./pages/BrowseSkill")));
 
 const UserSkills = Loadable(lazy(() => import("./pages/UserSkillPage")));
+const ChatPage = Loadable(lazy(() => import("./pages/chat/ChatPage.tsx")));
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -53,6 +55,12 @@ const router = createBrowserRouter([
       {
         path: "skills/:skillId",
         element: UserSkills,
+        errorElement: <ErrorPage />,
+      },
+
+      {
+        path: "chat/:conversationId",
+        element: ChatPage,
         errorElement: <ErrorPage />,
       },
 
