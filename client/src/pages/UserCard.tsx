@@ -12,7 +12,7 @@ import {
   Box,
 } from "@mantine/core";
 import { useAtom } from "jotai";
-import { userInfoAtom } from "../store/atom.js";
+import { userInfoAtom, selectedUserAtom } from "../store/atom.js";
 import {
   IconHeart,
   IconStar,
@@ -27,9 +27,8 @@ function UserCard({ user }) {
     user?.user?.profilePic || "https://via.placeholder.com/300";
 
   const [loggedinuser, setloggedinUser] = useAtom(userInfoAtom);
- const navigate = useNavigate();
-
-
+  const navigate = useNavigate();
+  const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
 
   // console.log("Logged in user in UserCard:", loggedinuser);
   const handleChat = async () => {
@@ -46,12 +45,12 @@ function UserCard({ user }) {
         }),
       },
     );
-   // console.log("Chat creation response:", response);
+    // console.log("Chat creation response:", response);
     if (response.ok) {
       const data = await response.json();
-     // console.log("Chat created successfully:", data);
+      setSelectedUser(user.user);
       // Optionally, navigate to the chat page or show a success message
-      navigate(`/app/chat/${data._id}`);
+      navigate(`/app/chat/${data._id}?userId=${user.user._id}`); // navigate to chat page with conversation ID and selected user ID as query param
     } else {
       console.error("Failed to create chat");
       // Optionally, show an error message to the user

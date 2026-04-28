@@ -9,7 +9,7 @@ import { socket } from "../../utils/socket.js";
 export default function ChatWindow({
   conversationId,
 }: {
-  conversationId: string;
+  conversationId: string | undefined;
 }) {
   const [messages, setMessages] = useState([]);
 
@@ -22,7 +22,6 @@ export default function ChatWindow({
         `${import.meta.env.VITE_API_BASE_URL}/messages/${conversationId}`,
       );
       const data = await res.json();
-      console.log("Fetched messages:", data);
       setMessages(data);
     };
 
