@@ -28,21 +28,50 @@ export const io = new Server(server, {
   },
 });
 
-// ✅ Socket logic
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+let onlineUsers = new Map(); // userId => Set of socketIds
 
+io.on("connection", (socket) => {
+  console.log("User connected with socketid:", socket.id);
+
+  const userId = socket.handshake.auth.userId;
+  if (!userId) return;
+
+  // ✅ Add socket
+  if (!onlineUsers.has(userId)) {
+    onlineUsers.set(userId, new Set());
+  }
+
+  onlineUsers.get(userId).add(socket.id);
+
+  // ✅ Emit updated list
+  io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+
+  // 👉 Rooms
   socket.on("joinConversation", (conversationId) => {
     socket.join(conversationId);
-    console.log(`Joined room: ${conversationId}`);
   });
 
   socket.on("leaveConversation", (conversationId) => {
     socket.leave(conversationId);
   });
 
+  // ✅ Proper disconnect handling
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
+
+    const userSockets = onlineUsers.get(userId);
+
+    if (userSockets) {
+      userSockets.delete(socket.id);
+
+      // if no sockets left → user offline
+      if (userSockets.size === 0) {
+        onlineUsers.delete(userId);
+      }
+    }
+
+    // ✅ Emit updated list again
+    io.emit("onlineUsers", Array.from(onlineUsers.keys()));
   });
 });
 
@@ -51,7 +80,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL,
     credentials: true,
-  })
+  }),
 );
 
 app.use(cookieParser());

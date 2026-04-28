@@ -31,16 +31,17 @@ export default function Login() {
         },
       );
       const data = await response.json();
-    //  console.log("Login Response:", data);
+      //  console.log("Login Response:", data);
       if (data.success && data.status === 200) {
         setUser(data.user);
         setIsLoggedIn(true);
         localStorage.setItem("accessToken", data.user.accessToken);
+        localStorage.setItem("userInfo", JSON.stringify(data.user));
         toast.success("Login successful!");
         setTimeout(() => {
           navigate("/");
         }, 2000); // Delay navigation to show toast
-      }else{
+      } else {
         toast.error(data.message || "Login failed. Please try again.");
       }
     } catch (error) {

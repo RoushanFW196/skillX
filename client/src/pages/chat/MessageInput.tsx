@@ -1,4 +1,4 @@
-import { socket } from "../../utils/socket.js";
+import { getSocket } from "../../utils/socket.ts";
 import { useState } from "react";
 import { TextInput, ActionIcon, Group } from "@mantine/core";
 import { IconSend } from "@tabler/icons-react";
@@ -16,7 +16,7 @@ export default function MessageInput({
 
   const sendMessage = async () => {
     if (!text.trim()) return;
-
+    const socket = getSocket();
     const tempMessage = {
       _id: Date.now(), // temporary ID
       content: { text },
@@ -24,9 +24,6 @@ export default function MessageInput({
       createdAt: new Date(),
       pending: true,
     };
-
-    // ✅ 1. Optimistic update
-  //  setMessages((prev: any) => [...prev, tempMessage]);
 
     setText("");
 
