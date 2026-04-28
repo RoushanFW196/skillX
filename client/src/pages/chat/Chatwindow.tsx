@@ -4,7 +4,7 @@ import MessageInput from "./MessageInput";
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
 import { userInfoAtom } from "../../store/atom.js";
-import { socket } from "../../utils/socket.js";
+import { getSocket } from "../../utils/socket.js";
 
 export default function ChatWindow({
   conversationId,
@@ -32,8 +32,9 @@ export default function ChatWindow({
   useEffect(() => {
     if (!conversationId) return;
 
+    const socket = getSocket();
+    if (!socket) return;
     socket.emit("joinConversation", conversationId);
-
     return () => {
       socket.emit("leaveConversation", conversationId);
     };
@@ -49,8 +50,9 @@ export default function ChatWindow({
       });
     };
 
+    const socket = getSocket();
+    if (!socket) return;
     socket.on("receiveMessage", handler);
-
     return () => socket.off("receiveMessage", handler);
   }, []);
 

@@ -1,7 +1,7 @@
 import { Grid } from "@mantine/core";
 import ChatSidebar from "./ChatSidebar";
 import ChatWindow from "./Chatwindow";
-import { socket } from "../../utils/socket.js";
+import { getSocket } from "../../utils/socket.js";
 import { onlineUsersAtom, userInfoAtom } from "../../store/atom.js";
 import { useParams } from "react-router";
 import { useEffect } from "react";
@@ -13,12 +13,20 @@ export default function ChatPage() {
   // console.log("ChatPage conversationId:", conversationId); // 🔥 debug
 
   useEffect(() => {
-    socket.on("onlineUsers", (users: any) => {
+    const socket = getSocket();
+
+    if (!socket) return;
+
+    const handleOnlineUsers = (users: string[]) => {
+      console.log("online users:", users);
+      // update atom here
       setOnlineUsers(users);
-    });
+    };
+
+    socket.on("onlineUsers", handleOnlineUsers);
 
     return () => {
-      socket.off("onlineUsers");
+      socket.off("onlineUsers", handleOnlineUsers);
     };
   }, []);
 
