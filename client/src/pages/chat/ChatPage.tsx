@@ -1,46 +1,66 @@
 import { Grid } from "@mantine/core";
+import { useParams } from "react-router";
+import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 import ChatSidebar from "./ChatSidebar";
 import ChatWindow from "./Chatwindow";
 import { getSocket } from "../../utils/socket.js";
 import { onlineUsersAtom, userInfoAtom } from "../../store/atom.js";
-import { useParams } from "react-router";
-import { useEffect } from "react";
-import { useAtom } from "jotai";
 
 export default function ChatPage() {
   const { conversationId } = useParams(); // TODO: get from URL or state
   const [onlineUsers, setOnlineUsers] = useAtom(onlineUsersAtom);
-  // console.log("ChatPage conversationId:", conversationId); // 🔥 debug
+  const [userInfo] = useAtom(userInfoAtom);
+  const [conversations, setConversations] = useState([]);
+  useEffect(() => {
+    if (!userInfo) return; // Wait until userInfo is available
+    fetchAllConversations();
+  }, []);
 
   useEffect(() => {
     const socket = getSocket();
-
     if (!socket) return;
-
     const handleOnlineUsers = (users: string[]) => {
       console.log("online users:", users);
       // update atom here
       setOnlineUsers(users);
     };
-
     socket.on("onlineUsers", handleOnlineUsers);
-
     return () => {
       socket.off("onlineUsers", handleOnlineUsers);
     };
   }, []);
 
+  const fetchAllConversations = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/conversations?userId=${userInfo._id}`,
+      );
+      const data = await response.json();
+      setConversations(data);
+      if (!response.ok) {
+        throw new Error("Failed to fetch conversations");
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    }
+  };
+
   return (
     <Grid style={{ height: "100vh" }}>
       {/* Sidebar */}
       <Grid.Col span={4} style={{ borderRight: "1px solid #eee" }}>
-        <ChatSidebar />
+        <ChatSidebar conversations={conversations} />
       </Grid.Col>
 
       {/* Chat Window */}
-      <Grid.Col span={8}>
-        <ChatWindow conversationId={conversationId} />
-      </Grid.Col>
+      {conversationId ? (
+        <Grid.Col span={8}>
+          <ChatWindow conversationId={conversationId} />
+        </Grid.Col>
+      ) : (
+        <h1> choose a user to chat</h1>
+      )}
     </Grid>
   );
 }

@@ -57,7 +57,11 @@ const router = createBrowserRouter([
         element: UserSkills,
         errorElement: <ErrorPage />,
       },
-
+      {
+        path: "chat",
+        element: ChatPage,
+        errorElement: <ErrorPage />,
+      },
       {
         path: "chat/:conversationId",
         element: ChatPage,
