@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { Zap, Menu, X, Sun, Moon, LogOut, User } from "lucide-react";
+import { Zap, Menu, X, Sun, Moon, LogOut, User, Inbox } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
@@ -86,16 +86,14 @@ export function Header() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {["Browse Skills", "Matches", "Community", "About"].map(
-              (item) => (
-                <NavLink
-                  key={item}
-                  className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
-                  href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
-                  label={item}
-                />
-              ),
-            )}
+            {["Browse Skills", "Matches", "Community", "About"].map((item) => (
+              <NavLink
+                key={item}
+                className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
+                href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
+                label={item}
+              />
+            ))}
           </div>
 
           {/* Right Section */}
@@ -125,6 +123,14 @@ export function Header() {
                   >
                     <User className="w-4 h-4" />
                     Profile
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/app/chat")}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-neutral-100  rounded-lg"
+                  >
+                    <Inbox className="w-4 h-4" />
+                    Messages
                   </button>
 
                   <button
