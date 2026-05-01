@@ -55,6 +55,14 @@ io.on("connection", (socket) => {
     socket.leave(conversationId);
   });
 
+  socket.on("typing", ({ conversationId, senderId }) => {
+    socket.to(conversationId).emit("typing", { senderId });
+  });
+
+  socket.on("stopTyping", ({ conversationId, senderId }) => {
+    socket.to(conversationId).emit("stopTyping", { senderId });
+  });
+
   // ✅ Proper disconnect handling
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
