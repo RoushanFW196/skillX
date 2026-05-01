@@ -6,6 +6,7 @@ import ChatSidebar from "./ChatSidebar";
 import ChatWindow from "./Chatwindow";
 import { getSocket } from "../../utils/socket.js";
 import { onlineUsersAtom, userInfoAtom } from "../../store/atom.js";
+import ChatEmptyState from "./ChatEmptyState.js";
 
 export default function ChatPage() {
   const { conversationId } = useParams(); // TODO: get from URL or state
@@ -47,7 +48,7 @@ export default function ChatPage() {
   };
 
   return (
-    <Grid style={{ height: "100vh" }}>
+    <Grid>
       {/* Sidebar */}
       <Grid.Col span={4} style={{ borderRight: "1px solid #eee" }}>
         <ChatSidebar conversations={conversations} />
@@ -59,7 +60,9 @@ export default function ChatPage() {
           <ChatWindow conversationId={conversationId} />
         </Grid.Col>
       ) : (
-        <h1> choose a user to chat</h1>
+        <Grid.Col span={8}  className="mt-20">
+          <ChatEmptyState />
+        </Grid.Col>
       )}
     </Grid>
   );

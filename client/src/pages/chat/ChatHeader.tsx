@@ -1,4 +1,4 @@
-import { Group, Avatar, Text } from "@mantine/core";
+import { Group, Avatar, Text, Indicator } from "@mantine/core";
 import { useAtom } from "jotai";
 import { selectedUserAtom, onlineUsersAtom } from "../../store/atom.js";
 import { fetchUserInfo } from "../../utils/commonfunction.js";
@@ -12,7 +12,6 @@ export default function ChatHeader() {
   const isOnline = onlineUsers.includes(selectedUser?._id);
   const [searchParams] = useSearchParams();
   const userId = searchParams.get("userId");
-
   useEffect(() => {
     const fetchuser = async () => {
       try {
@@ -37,10 +36,21 @@ export default function ChatHeader() {
       justify="space-between"
     >
       <Group>
-        <Avatar
-          radius="xl"
-          src={selectedUser?.profilePic || "https://via.placeholder.com/300"}
-        />
+        <Indicator
+          inline
+          size={10}
+          offset={4}
+          position="bottom-end"
+          color="green"
+          withBorder
+          disabled={!onlineUsers.includes(userId)}
+        >
+          <Avatar
+            radius="xl"
+            src={selectedUser?.profilePic || "https://via.placeholder.com/300"}
+          />
+        </Indicator>
+
         <div>
           <Text fw={500}>{selectedUser?.name || "User"}</Text>
           <Text size="xs" c={isOnline ? "green" : "gray"}>
