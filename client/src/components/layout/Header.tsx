@@ -1,215 +1,293 @@
 import { useAtom } from "jotai";
-import { Zap, Menu, X, Sun, Moon, LogOut, User, Inbox } from "lucide-react";
+import { motion } from "framer-motion";
+import { Zap, Menu, Sun, Moon, LogOut, User, Inbox } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
-import { Avatar, NavLink, Popover } from "@mantine/core";
+import { Avatar, Drawer, NavLink, Popover } from "@mantine/core";
 import { toast } from "react-toastify";
 import { fetchUserInfo } from "../../utils/commonfunction.js";
 
 export function Header() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
   const navigate = useNavigate();
   const [user, setUser] = useAtom(userInfoAtom);
+  const isMobile = useMediaQuery("(max-width: 768px)", true);
+  const [opened, { open, close }] = useDisclosure(false);
 
-  const handleStart = () => {
-    navigate("/auth/login");
-  };
+  const handleStart = () => navigate("/auth/login");
 
-  // after page reload, check if user is still logged in (e.g., by checking localStorage or making an API call)
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
       setIsLoggedIn(true);
-      // Optionally, fetch user info here and set it in the global state
       fetchUser();
     }
-  }, [setIsLoggedIn]);
+  }, []);
 
   const fetchUser = async () => {
-    const token = localStorage.getItem("accessToken");
     try {
+      const token = localStorage.getItem("accessToken");
       const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
       const data = await fetchUserInfo(decodedUser?.id);
-
       setUser(data);
-    } catch (error) {
-      console.error("Error fetching user info:", error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const handleLogout = async () => {
-    // clear tokens, cookies etc
-    const response = await fetch(
+    const res = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/user/logout`,
-      {
-        method: "POST",
-        credentials: "include",
-      },
+      { method: "POST", credentials: "include" },
     );
-    if (response.ok) {
+
+    if (res.ok) {
       localStorage.removeItem("accessToken");
       setIsLoggedIn(false);
       toast.success("Logged out successfully!");
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
-    } else {
-      console.error("Logout failed");
+      navigate("/");
     }
   };
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    setDarkMode(savedTheme === "dark");
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
   const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
+    setDarkMode((prev) => !prev);
   };
 
+  useEffect(() => {
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-neutral-200">
-      <nav className="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-neutral-900/80 border-b dark:border-neutral-800">
+      {" "}
+      <nav className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* 🔥 Logo */}
           <div
             onClick={() => navigate("/")}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2 cursor-pointer"
           >
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" />
             </div>
-
-            <span className="text-xl font-bold tracking-tight text-neutral-900">
+            <span className="text-lg font-bold text-neutral-900 dark:text-white">
               SkillX
             </span>
           </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            {["Browse Skills", "Matches", "Community", "About"].map((item) => (
-              <NavLink
-                key={item}
-                className="text-sm font-medium text-neutral-700 hover:text-indigo-600 transition"
-                href={item === "Browse Skills" ? "/app/explore-skills" : "#"}
-                label={item}
-              />
-            ))}
-          </div>
+          {/* ✅ Desktop Nav */}
+          {!isMobile && (
+            <div className="flex items-center gap-6">
+              <NavLink label="Browse Skills" href="/app/explore-skills" />
+              <NavLink label="Matches" />
+              <NavLink label="Community" />
+              <NavLink label="About" />
+            </div>
+          )}
 
-          {/* Right Section */}
-          <div className="hidden md:flex items-center gap-4">
-            {/* 🌙 Theme Toggle */}
+          {/* ✅ Desktop Right */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Theme */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
+              className="p-2 rounded-md hover:bg-gray-100"
             >
-              {darkMode ? (
-                <Sun className="w-5 h-5 text-yellow-400" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            {/* 👤 If user logged in */}
             {isloggedIn ? (
               <Popover width={200} position="bottom" withArrow shadow="md">
                 <Popover.Target>
-                  <Avatar src={user?.profilePic || null} alt="it's me" />
+                  <Avatar src={user?.profilePic || null} />
                 </Popover.Target>
+
                 <Popover.Dropdown>
                   <button
                     onClick={() => navigate("/app/profile")}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-neutral-100  rounded-lg"
+                    className="flex gap-2 w-full p-2 hover:bg-gray-100 rounded"
                   >
-                    <User className="w-4 h-4" />
-                    Profile
+                    <User size={16} /> Profile
                   </button>
 
                   <button
                     onClick={() => navigate("/app/chat")}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-neutral-100  rounded-lg"
+                    className="flex gap-2 w-full p-2 hover:bg-gray-100 rounded"
                   >
-                    <Inbox className="w-4 h-4" />
-                    Messages
+                    <Inbox size={16} /> Messages
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50  rounded-lg"
+                    className="flex gap-2 w-full p-2 text-red-500 hover:bg-red-50 rounded"
                   >
-                    <LogOut className="w-4 h-4" />
-                    Logout
+                    <LogOut size={16} /> Logout
                   </button>
                 </Popover.Dropdown>
               </Popover>
             ) : (
               <button
                 onClick={handleStart}
-                className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
               >
                 Get Started
               </button>
             )}
           </div>
 
-          {/* Mobile Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-neutral-100  transition"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
-        </div>
-      </nav>
-
-      {/* 📱 Mobile Drawer */}
-      <div
-        className={`md:hidden fixed top-0 right-0 h-full w-64 bg-white  shadow-xl transform transition-transform duration-300 ${
-          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex justify-between items-center p-4 border-b ">
-          <span className="font-semibold">Menu</span>
-          <X
-            className="w-5 h-5 cursor-pointer"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        </div>
-
-        <div className="flex flex-col gap-5 p-5">
-          {["Browse Skills", "Community", "About"].map((item) => (
-            <a key={item} href="#" className="font-medium">
-              {item}
-            </a>
-          ))}
-
-          {/* Theme toggle mobile */}
-          <button onClick={toggleTheme} className="flex items-center gap-2">
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            Toggle Theme
-          </button>
-
-          {user ? (
-            <>
-              <button onClick={() => navigate("/profile")}>Profile</button>
-              <button onClick={handleLogout} className="text-red-500">
-                Logout
+          {isMobile && (
+            <div className="flex items-center">
+              <button onClick={toggleTheme} className="mr-3">
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-            </>
-          ) : (
-            <button
-              onClick={handleStart}
-              className="mt-4 px-4 py-2 rounded-lg bg-indigo-600 text-white"
-            >
-              Get Started
-            </button>
+
+              <button onClick={open}>
+                <Menu size={22} />
+              </button>
+            </div>
           )}
         </div>
-      </div>
+      </nav>
+      {isMobile && (
+        <Drawer
+          opened={opened}
+          onClose={close}
+          position="right"
+          size="85%"
+          padding="0"
+          overlayProps={{ opacity: 0.4, blur: 6 }}
+        >
+          <motion.div
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 260, damping: 25 }}
+            className="flex flex-col h-full bg-white"
+          >
+            {/* 👤 USER HEADER */}
+            {isloggedIn && (
+              <div className="flex items-center gap-3 p-5 border-b">
+                <Avatar src={user?.profilePic || null} size="lg" />
+                <div>
+                  <p className="font-semibold text-sm">
+                    {user?.name || "User"}
+                  </p>
+                  <p className="text-xs text-gray-500">Welcome back 👋</p>
+                </div>
+              </div>
+            )}
+
+            {/* 📌 NAV LINKS */}
+            <div className="flex flex-col p-4 gap-2">
+              {[
+                {
+                  label: "Browse Skills",
+                  icon: <Zap size={18} />,
+                  path: "/app/explore-skills",
+                },
+                {
+                  label: "Matches",
+                  icon: <User size={18} />,
+                  path: "/app/matches",
+                },
+                {
+                  label: "Community",
+                  icon: <Inbox size={18} />,
+                  path: "/app/community",
+                },
+                { label: "About", icon: <User size={18} />, path: "/about" },
+              ].map((item) => (
+                <motion.button
+                  key={item.label}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => {
+                    navigate(item.path);
+                    close();
+                  }}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition"
+                >
+                  <span className="text-indigo-600">{item.icon}</span>
+                  <span className="font-medium text-sm">{item.label}</span>
+                </motion.button>
+              ))}
+            </div>
+
+            {/* ⚙️ SETTINGS + ACTIONS */}
+            <div className="mt-auto p-4 border-t flex flex-col gap-2">
+              {/* Theme */}
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={toggleTheme}
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100"
+              >
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                <span className="text-sm font-medium">Toggle Theme</span>
+              </motion.button>
+
+              {isloggedIn ? (
+                <>
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => {
+                      navigate("/app/profile");
+                      close();
+                    }}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100"
+                  >
+                    <User size={18} />
+                    <span className="text-sm font-medium">Profile</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => {
+                      navigate("/app/chat");
+                      close();
+                    }}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100"
+                  >
+                    <Inbox size={18} />
+                    <span className="text-sm font-medium">Messages</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileTap={{ scale: 0.96 }}
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-500"
+                  >
+                    <LogOut size={18} />
+                    <span className="text-sm font-medium">Logout</span>
+                  </motion.button>
+                </>
+              ) : (
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleStart}
+                  className="bg-indigo-600 text-white py-3 rounded-xl text-sm font-semibold"
+                >
+                  Get Started
+                </motion.button>
+              )}
+            </div>
+          </motion.div>
+        </Drawer>
+      )}
     </header>
   );
 }
