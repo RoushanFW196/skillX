@@ -9,24 +9,26 @@ import { onlineUsersAtom, userInfoAtom } from "../../store/atom.js";
 import ChatEmptyState from "./ChatEmptyState.js";
 
 export default function ChatPage() {
-  const { conversationId } = useParams(); // TODO: get from URL or state
+  const { conversationId } = useParams();
   const [onlineUsers, setOnlineUsers] = useAtom(onlineUsersAtom);
   const [userInfo] = useAtom(userInfoAtom);
   const [conversations, setConversations] = useState([]);
+
   useEffect(() => {
-    if (!userInfo) return; // Wait until userInfo is available
+    if (!userInfo) return;
     fetchAllConversations();
-  }, []);
+  }, [userInfo]);
 
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
-    const handleOnlineUsers = (users: string[]) => {
-      console.log("online users:", users);
-      // update atom here
+
+    const handleOnlineUsers = (users) => {
       setOnlineUsers(users);
     };
+
     socket.on("onlineUsers", handleOnlineUsers);
+
     return () => {
       socket.off("onlineUsers", handleOnlineUsers);
     };
@@ -35,7 +37,7 @@ export default function ChatPage() {
   const fetchAllConversations = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/conversations?userId=${userInfo._id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/conversations?userId=${userInfo._id}`
       );
       const data = await response.json();
       setConversations(data);
@@ -48,21 +50,21 @@ export default function ChatPage() {
   };
 
   return (
-    <Grid>
+    <Grid style={{overflow: "hidden", height: "auto" }}>
       {/* Sidebar */}
       <Grid.Col span={4} style={{ borderRight: "1px solid #eee" }}>
         <ChatSidebar conversations={conversations} />
       </Grid.Col>
 
       {/* Chat Window */}
-      {conversationId ? (
+        {conversationId ? (
         <Grid.Col span={8}>
           <ChatWindow conversationId={conversationId} />
         </Grid.Col>
-      ) : (
+        ) : (
         <Grid.Col span={8}  className="mt-20">
-          <ChatEmptyState />
-        </Grid.Col>
+            <ChatEmptyState />
+      </Grid.Col>
       )}
     </Grid>
   );
