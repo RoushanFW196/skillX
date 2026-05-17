@@ -97,9 +97,9 @@ export function Header() {
           {!isMobile && (
             <div className="flex items-center gap-4  justify-center">
               <NavLink label="Browse Skills" href="/app/explore-skills" />
-              <NavLink label="Matches" />
-              <NavLink label="Community" />
-              <NavLink label="About" />
+              <NavLink label="Matches"  href="/app/matches" />
+              <NavLink label="Community"  href="/app/community" />
+              <NavLink label="About" href="/app/about" />
             </div>
           )}
 

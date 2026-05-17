@@ -21,7 +21,9 @@ const Home = Loadable(lazy(() => import("./pages/Home")));
 const Signup = Loadable(lazy(() => import("./pages/Signup")));
 const Login = Loadable(lazy(() => import("./pages/Login")));
 const Profile = Loadable(lazy(() => import("./pages/Profile")));
-
+const AboutPage = Loadable(lazy(() => import("./pages/AboutPage.tsx")));
+const CommunityPage = Loadable(lazy(() => import("./pages/CommunityPage.tsx")));
+const MatchesPage = Loadable(lazy(() => import("./pages/MatchesPage.tsx")));
 const ExploreSkills = Loadable(lazy(() => import("./pages/BrowseSkill")));
 
 const UserSkills = Loadable(lazy(() => import("./pages/UserSkillPage")));
@@ -62,6 +64,25 @@ const router = createBrowserRouter([
         element: ChatPage,
         errorElement: <ErrorPage />,
       },
+
+      {
+        path: "matches",
+        element: MatchesPage,
+        errorElement: <ErrorPage />,
+      },
+
+      {
+        path: "about",
+        element: AboutPage,
+        errorElement: <ErrorPage />,
+      },
+
+      {
+        path: "community",
+        element: CommunityPage,
+        errorElement: <ErrorPage />,
+      },
+
       {
         path: "chat/:conversationId",
         element: ChatPage,
