@@ -58,3 +58,9 @@
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+.mantine-NavLink-label{
+  display: block;
+  width: 90px;
+  text-align: center;
+}
