@@ -52,28 +52,29 @@ export function Header() {
     }
   };
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    setDarkMode(savedTheme === "dark");
-  }, []);
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem("theme");
+  //   setDarkMode(savedTheme === "dark");
+  // }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+  // useEffect(() => {
+  //   if (darkMode) {
+  //     document.documentElement.classList.add("dark");
+  //   } else {
+  //     document.documentElement.classList.remove("dark");
+  //   }
 
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+  //   localStorage.setItem("theme", darkMode ? "dark" : "light");
+  // }, [darkMode]);
 
   const toggleTheme = () => {
     setDarkMode((prev) => !prev);
   };
 
-  useEffect(() => {
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+  // useEffect(() => {
+  //   localStorage.setItem("theme", darkMode ? "dark" : "light");
+  // }, [darkMode]);
+
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-neutral-900/80 border-b dark:border-neutral-800">
       {" "}
@@ -94,7 +95,7 @@ export function Header() {
 
           {/* ✅ Desktop Nav */}
           {!isMobile && (
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4  justify-center">
               <NavLink label="Browse Skills" href="/app/explore-skills" />
               <NavLink label="Matches" />
               <NavLink label="Community" />
