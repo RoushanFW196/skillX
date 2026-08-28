@@ -51,16 +51,16 @@ export default function Home() {
   ];
 
   return (
-    <div className="bg-white">
+    <div className="bg-white dark:bg-neutral-950">
       <section className="relative overflow-hidden pt-20 pb-32">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-40 left-20 w-72 h-72 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute top-40 left-20 w-72 h-72 bg-primary-100 dark:bg-primary-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-20 animate-pulse"></div>
           <div
-            className="absolute top-40 right-20 w-72 h-72 bg-accent-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
+            className="absolute top-40 right-20 w-72 h-72 bg-accent-100 dark:bg-accent-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-15 animate-pulse"
             style={{ animationDelay: "2s" }}
           ></div>
           <div
-            className="absolute -bottom-8 left-1/2 w-72 h-72 bg-secondary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
+            className="absolute -bottom-8 left-1/2 w-72 h-72 bg-secondary-100 dark:bg-secondary-500 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-3xl opacity-20 dark:opacity-20 animate-pulse"
             style={{ animationDelay: "4s" }}
           ></div>
         </div>
@@ -73,15 +73,15 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="text-6xl lg:text-7xl font-bold tracking-tight text-neutral-900 mb-6 leading-tight">
+          <h1 className="text-6xl lg:text-7xl font-bold tracking-tight text-neutral-900 dark:text-white mb-6 leading-tight">
             Exchange Skills,
-            <span className="bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent">
+            <span className="text-brand-gradient">
               {" "}
               Build Impact
             </span>
           </h1>
 
-          <p className="text-xl text-neutral-600 max-w-2xl mx-auto mb-12 leading-relaxed">
+          <p className="text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed">
             A platform where knowledge flows freely. Learn anything from anyone.
             Teach what you know. No money, just mutual growth.
           </p>
@@ -105,13 +105,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-24 bg-neutral-50">
+      <section className="py-24 bg-neutral-50 dark:bg-neutral-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-neutral-900 dark:text-white mb-4">
               Why Join SkillX?
             </h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+            <p className="text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
               Everything you need to learn, teach, and grow together with a
               supportive community
             </p>
@@ -120,13 +120,13 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <Card key={index} hover className="group">
-                <div className="text-primary-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="text-primary-600 dark:text-primary-400 mb-4 group-hover:scale-110 transition-transform duration-300">
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-neutral-600 text-sm leading-relaxed">
+                <p className="text-neutral-600 dark:text-neutral-400 text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </Card>
@@ -139,10 +139,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl lg:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
+              <h2 className="text-4xl lg:text-5xl font-bold text-neutral-900 dark:text-white mb-6 leading-tight">
                 How It Works
               </h2>
-              <p className="text-lg text-neutral-600 mb-8 leading-relaxed">
+              <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
                 Getting started is simple. Create your profile, showcase your
                 skills, find what you want to learn, and connect with the
                 community.
@@ -187,7 +187,7 @@ export default function Home() {
             </div>
 
             <div className="relative">
-              <div className="relative bg-gradient-to-br from-primary-500 via-accent-500 to-secondary-500 rounded-2xl overflow-hidden shadow-xl h-96 flex items-center justify-center">
+              <div className="relative bg-gradient-to-br from-primary-500 via-secondary-500 to-primary-700 rounded-2xl overflow-hidden shadow-xl h-96 flex items-center justify-center">
                 <div className="absolute inset-0 bg-black/10"></div>
                 <div className="relative text-center text-white">
                   <Sparkles className="w-24 h-24 mx-auto mb-4 opacity-80" />
@@ -231,20 +231,20 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 bg-neutral-50">
+      <section className="py-16 bg-neutral-50 dark:bg-neutral-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <p className="text-4xl font-bold text-primary-600 mb-2">10K+</p>
-              <p className="text-neutral-600">Active Learners</p>
+              <p className="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">10K+</p>
+              <p className="text-neutral-600 dark:text-neutral-400">Active Learners</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-accent-600 mb-2">50+</p>
-              <p className="text-neutral-600">Skill Categories</p>
+              <p className="text-4xl font-bold text-accent-600 dark:text-accent-400 mb-2">50+</p>
+              <p className="text-neutral-600 dark:text-neutral-400">Skill Categories</p>
             </div>
             <div>
-              <p className="text-4xl font-bold text-secondary-600 mb-2">150+</p>
-              <p className="text-neutral-600">Countries</p>
+              <p className="text-4xl font-bold text-secondary-600 dark:text-secondary-400 mb-2">150+</p>
+              <p className="text-neutral-600 dark:text-neutral-400">Countries</p>
             </div>
           </div>
         </div>

@@ -121,7 +121,7 @@ export default function SkillPage() {
   };
 
   return (
-    <Container size="lg" py="xl">
+    <Container size="lg" py="xl" >
       {/* 🔹 Header */}
       <Group justify="space-between" mb="lg">
         <div>
@@ -143,7 +143,7 @@ export default function SkillPage() {
         <Tabs
           value={activeTab}
           onChange={setActiveTab}
-          color="indigo"
+          color="primary"
           variant="pills"
         >
           <Tabs.List

@@ -34,8 +34,10 @@ export default function ChatSidebar({ conversations }) {
               p="sm"
               style={{
                 cursor: "pointer",
-                borderBottom: "1px solid #f1f1f1",
-                backgroundColor: isActive ? "#e7f1ff" : "white",
+                borderBottom: "1px solid var(--mantine-color-default-border)",
+                backgroundColor: isActive
+                  ? "var(--mantine-color-primary-light)"
+                  : "transparent",
               }}
               onClick={() =>
                 handleStartChat(conversation._id, otherMember?.userId._id)

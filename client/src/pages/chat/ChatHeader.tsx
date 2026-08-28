@@ -32,7 +32,7 @@ export default function ChatHeader() {
   return (
     <Group
       p="md"
-      style={{ borderBottom: "1px solid #eee" }}
+      style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}
       justify="space-between"
     >
       <Group>
@@ -47,13 +47,14 @@ export default function ChatHeader() {
         >
           <Avatar
             radius="xl"
-            src={selectedUser?.profilePic || "https://via.placeholder.com/300"}
+            src={selectedUser?.profilePic || null}
+            alt={selectedUser?.name || "User"}
           />
         </Indicator>
 
         <div>
           <Text fw={500}>{selectedUser?.name || "User"}</Text>
-          <Text size="xs" c={isOnline ? "green" : "gray"}>
+          <Text size="xs" c={isOnline ? "success.6" : "gray.5"}>
             {isOnline ? "Online" : "Offline"}
           </Text>
         </div>

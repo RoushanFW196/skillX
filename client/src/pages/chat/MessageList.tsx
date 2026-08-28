@@ -15,13 +15,7 @@ export default function MessageList({
   }, [messages]);
 
   return (
-    <ScrollArea
-      style={{
-        flex: 1,
-        padding: "20px 0",
-        background: "#f7f7f8",
-      }}
-    >
+    <ScrollArea className="bg-neutral-50 dark:bg-neutral-900" style={{ flex: 1, padding: "20px 0" }}>
       <Box
         style={{
           maxWidth: "800px",
@@ -52,22 +46,20 @@ export default function MessageList({
                 )}
 
                 <Box
-                  style={{
-                    background: isMine
-                      ? "linear-gradient(135deg, #d1f5d3, #b2e5b5)"
-                      : "#ffffff",
-                    padding: "10px 12px",
-                    borderRadius: isMine
-                      ? "16px 16px 4px 16px"
-                      : "16px 16px 16px 4px",
-
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                    border: isMine ? "none" : "1px solid #eee",
-                  }}
+                  className={`shadow-sm px-3 py-2 ${
+                    isMine
+                      ? "bg-primary-600 text-white rounded-2xl rounded-br-md"
+                      : "bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-2xl rounded-bl-md"
+                  }`}
                 >
                   {/* Name (only for others & first message in group) */}
                   {!isMine && !isSameSender && (
-                    <Text size="xs" fw={600} mb={2} c="blue">
+                    <Text
+                      size="xs"
+                      fw={600}
+                      mb={2}
+                      className="text-primary-600 dark:text-primary-400"
+                    >
                       {msg.sender?.name}
                     </Text>
                   )}
@@ -78,7 +70,16 @@ export default function MessageList({
                   </Text>
 
                   {/* Timestamp */}
-                  <Text size="10px" c="dimmed" ta="right" mt={4}>
+                  <Text
+                    size="10px"
+                    ta="right"
+                    mt={4}
+                    className={
+                      isMine
+                        ? "text-white/70"
+                        : "text-neutral-500 dark:text-neutral-400"
+                    }
+                  >
                     {new Date(msg.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",

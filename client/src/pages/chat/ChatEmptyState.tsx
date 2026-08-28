@@ -3,36 +3,19 @@ import { Button } from "@mantine/core";
 
 export default function ChatEmptyState() {
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        textAlign: "center",
-        color: "#666",
-      }}
-    >
+    <div className="h-full flex items-center justify-center flex-col text-center text-neutral-500 dark:text-neutral-400">
       {/* Icon */}
-      <div
-        style={{
-          background: "#f5f5f5",
-          borderRadius: "50%",
-          padding: "20px",
-          marginBottom: "20px",
-        }}
-      >
+      <div className="bg-primary-50 dark:bg-primary-950/60 text-primary-600 dark:text-primary-400 rounded-full p-5 mb-5">
         <IconMessageCircle size={40} />
       </div>
 
       {/* Heading */}
-      <h1 style={{ fontSize: "28px", fontWeight: "600", color: "#222" }}>
+      <h1 className="text-[28px] font-semibold text-neutral-800 dark:text-neutral-100">
         Choose a user to chat
       </h1>
 
       {/* Subtext */}
-      <p style={{ marginTop: "8px", maxWidth: "400px" }}>
+      <p className="mt-2 max-w-[400px]">
         Select a conversation from the left or start a new chat with someone in
         your network.
       </p>

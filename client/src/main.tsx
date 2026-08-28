@@ -3,7 +3,12 @@ import { createRoot } from "react-dom/client";
 import "@mantine/core/styles.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { MantineProvider } from "@mantine/core";
+import {
+  MantineProvider,
+  localStorageColorSchemeManager,
+  useMantineColorScheme,
+} from "@mantine/core";
+import { mantineTheme } from "./theme/mantine.theme";
 import App from "./App.tsx";
 import "./index.css";
 import { createBrowserRouter } from "react-router";
@@ -94,11 +99,29 @@ const router = createBrowserRouter([
   },
 ]);
 
+// Toasts follow the app color scheme (white in light, dark in dark mode)
+function ThemedToasts() {
+  const { colorScheme } = useMantineColorScheme();
+  return (
+    <ToastContainer
+      position="top-right"
+      autoClose={2000}
+      theme={colorScheme}
+    />
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <MantineProvider>
+    <MantineProvider
+      theme={mantineTheme}
+      defaultColorScheme="light"
+      colorSchemeManager={localStorageColorSchemeManager({
+        key: "skillx-color-scheme",
+      })}
+    >
       <RouterProvider router={router} />
-      <ToastContainer position="top-right" autoClose={2000} />
+      <ThemedToasts />
     </MantineProvider>
   </StrictMode>,
 );
