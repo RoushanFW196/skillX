@@ -165,8 +165,9 @@ export default function ProfilePage() {
         p={40}
         withBorder
         style={{
-          backgroundColor: "#f8fafc",
-          backgroundImage: "radial-gradient(#cbd5e1 0.5px, transparent 0.5px)",
+          backgroundColor: "var(--mantine-color-body)",
+          backgroundImage:
+            "radial-gradient(var(--mantine-color-default-border) 0.5px, transparent 0.5px)",
           backgroundSize: "20px 20px",
         }}
       >
@@ -183,7 +184,7 @@ export default function ProfilePage() {
                     radius="100%"
                     style={{
                       cursor: "pointer",
-                      border: "4px solid white",
+                      border: "4px solid var(--mantine-color-body)",
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                       transition: "filter 0.3s",
                     }}
@@ -211,16 +212,16 @@ export default function ProfilePage() {
             </Box>
 
             <Stack gap={2}>
-              <Text size="26px" fw={800} c="#1e293b">
+              <Text size="26px" fw={800}>
                 {profile?.name}
               </Text>
               <Text size="md" c="dimmed" mb={5}>
                 {profile?.email}
               </Text>
               <Badge
-                variant="filled"
-                color="#bae6fd"
-                styles={{ label: { color: "#0369a1", fontWeight: 700 } }}
+                variant="light"
+                color="primary"
+                fw={700}
                 size="lg"
                 radius="sm"
               >
@@ -235,7 +236,7 @@ export default function ProfilePage() {
             onClick={() => setOpened(true)}
             radius="md"
             size="md"
-            color="blue"
+            color="primary"
             styles={{ root: { borderWidth: "2px", fontWeight: 600 } }}
           >
             Edit Profile
@@ -243,7 +244,7 @@ export default function ProfilePage() {
         </Group>
 
         {/* BIO */}
-        <Text mt={25} size="lg" c="#475569" fw={500}>
+        <Text mt={25} size="lg" c="dimmed" fw={500}>
           {profile?.bio}
         </Text>
 
@@ -254,19 +255,19 @@ export default function ProfilePage() {
               label: "Credits",
               value: profile?.credits || 0,
               icon: <Coins size={20} />,
-              color: "blue",
+              color: "primary",
             },
             {
               label: "Rating",
               value: profile?.ratingAvg || "—",
               icon: <Star size={20} />,
-              color: "teal",
+              color: "accent",
             },
             {
               label: "Reviews",
               value: profile?.ratingCount || 0,
               icon: <MessageSquare size={20} />,
-              color: "green",
+              color: "success",
             },
           ].map((stat, idx) => (
             <Grid.Col key={idx} span={4}>
@@ -291,7 +292,7 @@ export default function ProfilePage() {
                   {stat.icon}
                 </ThemeIcon>
                 <Stack gap={0} align="center" style={{ flex: 1 }}>
-                  <Text fw={800} size="28px" c="#1e293b">
+                  <Text fw={800} size="28px">
                     {stat.value}
                   </Text>
                   <Text
@@ -314,8 +315,8 @@ export default function ProfilePage() {
         <Grid>
           <Grid.Col span={6}>
             <Group gap="xs" mb="md">
-              <HandHeart size={20} color="#2563eb" />
-              <Text fw={800} size="lg" c="#1e293b">
+              <HandHeart size={20} color="#4f46e5" />
+              <Text fw={800} size="lg">
                 Skills Offered
               </Text>
             </Group>
@@ -326,7 +327,7 @@ export default function ProfilePage() {
                   key={skill._id}
                   size="xl"
                   radius="xl"
-                  color="blue"
+                  color="primary"
                   variant="filled"
                   leftSection={getSkillIcon(skill.name)}
                   // styles={{
@@ -341,8 +342,8 @@ export default function ProfilePage() {
 
           <Grid.Col span={6}>
             <Group gap="xs" mb="md">
-              <Target size={20} color="#16a34a" />
-              <Text fw={800} size="lg" c="#1e293b">
+              <Target size={20} color="#059669" />
+              <Text fw={800} size="lg">
                 Skills Wanted
               </Text>
             </Group>
@@ -353,7 +354,7 @@ export default function ProfilePage() {
                   key={skill._id}
                   size="xl"
                   radius="xl"
-                  color="green"
+                  color="success"
                   variant="light"
                   leftSection={getSkillIcon(skill.name)}
                 >

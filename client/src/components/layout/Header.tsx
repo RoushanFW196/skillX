@@ -1,16 +1,21 @@
 import { useAtom } from "jotai";
 import { motion } from "framer-motion";
 import { Zap, Menu, Sun, Moon, LogOut, User, Inbox } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { loginAtom, userInfoAtom } from "../../store/atom.js";
-import { Avatar, Drawer, NavLink, Popover } from "@mantine/core";
+import { Avatar, Drawer, NavLink, Popover, useMantineColorScheme } from "@mantine/core";
 import { toast } from "react-toastify";
 import { fetchUserInfo } from "../../utils/commonfunction.js";
 
 export function Header() {
-  const [darkMode, setDarkMode] = useState(false);
+  // ✅ Dark mode is managed by Mantine (persists to localStorage and sets
+  //    data-mantine-color-scheme on <html>, which Tailwind's dark: reacts to)
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
+  const toggleTheme = toggleColorScheme;
+
   const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
   const navigate = useNavigate();
   const [user, setUser] = useAtom(userInfoAtom);
@@ -52,29 +57,6 @@ export function Header() {
     }
   };
 
-  // useEffect(() => {
-  //   const savedTheme = localStorage.getItem("theme");
-  //   setDarkMode(savedTheme === "dark");
-  // }, []);
-
-  // useEffect(() => {
-  //   if (darkMode) {
-  //     document.documentElement.classList.add("dark");
-  //   } else {
-  //     document.documentElement.classList.remove("dark");
-  //   }
-
-  //   localStorage.setItem("theme", darkMode ? "dark" : "light");
-  // }, [darkMode]);
-
-  const toggleTheme = () => {
-    setDarkMode((prev) => !prev);
-  };
-
-  // useEffect(() => {
-  //   localStorage.setItem("theme", darkMode ? "dark" : "light");
-  // }, [darkMode]);
-
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-neutral-900/80 border-b dark:border-neutral-800">
       {" "}
@@ -85,7 +67,7 @@ export function Header() {
             onClick={() => navigate("/")}
             className="flex items-center gap-2 cursor-pointer"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center shadow-soft">
               <Zap className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-bold text-neutral-900 dark:text-white">
@@ -108,9 +90,9 @@ export function Header() {
             {/* Theme */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-md hover:bg-gray-100"
+              className="p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
             >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
             {isloggedIn ? (
@@ -122,21 +104,21 @@ export function Header() {
                 <Popover.Dropdown>
                   <button
                     onClick={() => navigate("/app/profile")}
-                    className="flex gap-2 w-full p-2 hover:bg-gray-100 rounded"
+                    className="flex gap-2 w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
                   >
                     <User size={16} /> Profile
                   </button>
 
                   <button
                     onClick={() => navigate("/app/chat")}
-                    className="flex gap-2 w-full p-2 hover:bg-gray-100 rounded"
+                    className="flex gap-2 w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
                   >
                     <Inbox size={16} /> Messages
                   </button>
 
                   <button
                     onClick={handleLogout}
-                    className="flex gap-2 w-full p-2 text-red-500 hover:bg-red-50 rounded"
+                    className="flex gap-2 w-full p-2 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-950/40 rounded"
                   >
                     <LogOut size={16} /> Logout
                   </button>
@@ -145,7 +127,7 @@ export function Header() {
             ) : (
               <button
                 onClick={handleStart}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors shadow-soft"
               >
                 Get Started
               </button>
@@ -155,7 +137,7 @@ export function Header() {
           {isMobile && (
             <div className="flex items-center">
               <button onClick={toggleTheme} className="mr-3">
-                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
               </button>
 
               <button onClick={open}>
@@ -179,17 +161,17 @@ export function Header() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 25 }}
-            className="flex flex-col h-full bg-white"
+            className="flex flex-col h-full bg-white dark:bg-neutral-900"
           >
             {/* 👤 USER HEADER */}
             {isloggedIn && (
-              <div className="flex items-center gap-3 p-5 border-b">
+              <div className="flex items-center gap-3 p-5 border-b dark:border-neutral-800">
                 <Avatar src={user?.profilePic || null} size="lg" />
                 <div>
                   <p className="font-semibold text-sm">
                     {user?.name || "User"}
                   </p>
-                  <p className="text-xs text-gray-500">Welcome back 👋</p>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Welcome back 👋</p>
                 </div>
               </div>
             )}
@@ -221,9 +203,9 @@ export function Header() {
                     navigate(item.path);
                     close();
                   }}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 transition"
                 >
-                  <span className="text-indigo-600">{item.icon}</span>
+                  <span className="text-primary-600">{item.icon}</span>
                   <span className="font-medium text-sm">{item.label}</span>
                 </motion.button>
               ))}
@@ -235,9 +217,9 @@ export function Header() {
               <motion.button
                 whileTap={{ scale: 0.96 }}
                 onClick={toggleTheme}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
               >
-                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
                 <span className="text-sm font-medium">Toggle Theme</span>
               </motion.button>
 
@@ -249,7 +231,7 @@ export function Header() {
                       navigate("/app/profile");
                       close();
                     }}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
                   >
                     <User size={18} />
                     <span className="text-sm font-medium">Profile</span>
@@ -261,7 +243,7 @@ export function Header() {
                       navigate("/app/chat");
                       close();
                     }}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
                   >
                     <Inbox size={18} />
                     <span className="text-sm font-medium">Messages</span>
@@ -270,7 +252,7 @@ export function Header() {
                   <motion.button
                     whileTap={{ scale: 0.96 }}
                     onClick={handleLogout}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-500"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-danger-50 dark:hover:bg-danger-950/40 text-danger-600 transition"
                   >
                     <LogOut size={18} />
                     <span className="text-sm font-medium">Logout</span>
@@ -280,7 +262,7 @@ export function Header() {
                 <motion.button
                   whileTap={{ scale: 0.96 }}
                   onClick={handleStart}
-                  className="bg-indigo-600 text-white py-3 rounded-xl text-sm font-semibold"
+                  className="bg-primary-600 text-white py-3 rounded-xl text-sm font-semibold"
                 >
                   Get Started
                 </motion.button>

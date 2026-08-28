@@ -52,7 +52,10 @@ export default function ChatPage() {
   return (
     <Grid style={{overflow: "hidden", height: "auto" }}>
       {/* Sidebar */}
-      <Grid.Col span={4} style={{ borderRight: "1px solid #eee" }}>
+      <Grid.Col
+        span={4}
+        style={{ borderRight: "1px solid var(--mantine-color-default-border)" }}
+      >
         <ChatSidebar conversations={conversations} />
       </Grid.Col>
 

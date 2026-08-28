@@ -2,17 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   SKILLX GLOBAL STYLES
+   All pages should consume these tokens instead of hardcoding
+   indigo/purple/hex values so the UI stays uniform.
+   ============================================================ */
+
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-white text-neutral-900 font-sans;
+    @apply bg-white text-neutral-800 font-sans antialiased dark:bg-neutral-950 dark:text-neutral-200 transition-colors duration-200;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
+    @apply font-bold tracking-tight text-neutral-900 dark:text-white;
   }
 
   h1 {
@@ -26,17 +32,95 @@
   h3 {
     @apply text-2xl;
   }
+
+  ::selection {
+    @apply bg-primary-500/20 text-primary-900 dark:text-primary-100;
+  }
+
+  /* Uniform focus outline everywhere */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+
+  /* Slim, brand-colored scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-neutral-100 dark:bg-neutral-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-neutral-300 rounded-full dark:bg-neutral-700;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400 dark:bg-neutral-600;
+  }
 }
 
 @layer components {
+  /* ---------- Brand gradients (use everywhere instead of raw indigo/purple) ---------- */
+  .bg-brand-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600;
+  }
+
+  .text-brand-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
+  }
+
+  /* ---------- Buttons ---------- */
   .btn-primary {
-    @apply px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-lg;
+    @apply inline-flex items-center justify-center px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-soft hover:bg-primary-700 hover:shadow-medium hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-neutral-100 text-neutral-900 font-semibold rounded-lg hover:bg-neutral-200 transition-colors;
+    @apply inline-flex items-center justify-center px-6 py-3 bg-secondary-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-soft hover:bg-secondary-700 hover:shadow-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2;
   }
 
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 border-2 border-primary-600 text-primary-600 font-semibold rounded-lg transition-colors duration-200 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-3 text-neutral-700 font-medium rounded-lg transition-colors duration-200 hover:bg-neutral-100;
+  }
+
+  /* ---------- Cards & surfaces ---------- */
+  .card-surface {
+    @apply bg-white rounded-xl border border-neutral-200/70 shadow-soft p-6;
+  }
+
+  /* ---------- Inputs (Tailwind-only forms) ---------- */
+  .input-field {
+    @apply w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 placeholder-neutral-400 transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder-neutral-500;
+  }
+
+  .input-with-icon {
+    @apply mt-1 flex items-center rounded-lg border border-neutral-200 px-3 py-2 transition-colors focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-500/30 dark:border-neutral-700 dark:bg-neutral-900;
+  }
+
+  /* ---------- Badges ---------- */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-700;
+  }
+
+  .badge-success {
+    @apply badge bg-success-100 text-success-700;
+  }
+
+  .badge-accent {
+    @apply badge bg-accent-100 text-accent-700;
+  }
+
+  /* ---------- Layout helpers ---------- */
   .container-max {
     @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
   }
@@ -59,7 +143,8 @@
   animation: float 6s ease-in-out infinite;
 }
 
-.mantine-NavLink-label{
+/* Mantine NavLink centered labels in the desktop header */
+.mantine-NavLink-label {
   display: block;
   width: 90px;
   text-align: center;

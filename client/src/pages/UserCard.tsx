@@ -1,6 +1,6 @@
 import {
   Card,
-  Image,
+  Avatar,
   Text,
   Group,
   Badge,
@@ -23,9 +23,6 @@ import {
 import { useNavigate } from "react-router";
 
 function UserCard({ user }) {
-  const profilePic =
-    user?.user?.profilePic || "https://via.placeholder.com/300";
-
   const [loggedinuser, setloggedinUser] = useAtom(userInfoAtom);
   const navigate = useNavigate();
   const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
@@ -60,16 +57,17 @@ function UserCard({ user }) {
   return (
     <Card shadow="sm" radius="xl" p={0} withBorder mb="lg">
       <Flex>
-        {/* LEFT IMAGE */}
-        <Image
-          src={profilePic}
+        {/* LEFT IMAGE — Avatar falls back to initials when no photo */}
+        <Avatar
+          src={user?.user?.profilePic || null}
           alt={user.user.name}
           w={160}
           h={180}
-          fit="cover"
+          radius={0}
           style={{
             borderTopLeftRadius: "16px",
             borderBottomLeftRadius: "16px",
+            flexShrink: 0,
           }}
         />
 
@@ -86,13 +84,13 @@ function UserCard({ user }) {
                 <Text fw={700} size="lg">
                   {user.user.name}
                 </Text>
-                <Badge color="blue" size="xs">
+                <Badge color="primary" size="xs">
                   ✔
                 </Badge>
               </Group>
 
               {/* Price */}
-              <Badge color="green" variant="light">
+              <Badge color="success" variant="light">
                 ₹{user.pricePerHour || 0}/hr
               </Badge>
             </Group>
@@ -129,15 +127,11 @@ function UserCard({ user }) {
           {/* Actions */}
           <Group
             grow
-            style={{
-              background: "#eeeff0",
-              padding: "10px",
-              borderRadius: "10px",
-            }}
+            className="bg-neutral-100 dark:bg-neutral-800 rounded-[10px] p-2.5"
           >
             <Button
               variant="subtle"
-              color="red"
+              color="danger"
               leftSection={<IconHeart size={16} />}
             >
               Interest
@@ -145,7 +139,7 @@ function UserCard({ user }) {
 
             <Button
               variant="subtle"
-              color="yellow"
+              color="accent"
               leftSection={<IconStar size={16} />}
             >
               Save
@@ -161,7 +155,7 @@ function UserCard({ user }) {
 
             <Button
               variant="light"
-              color="blue"
+              color="primary"
               leftSection={<IconMessageCircle size={16} />}
               onClick={handleChat}
             >
