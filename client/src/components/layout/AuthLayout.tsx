@@ -3,9 +3,11 @@ import { Header } from "./Header.tsx";
 
 export function AuthLayout() {
   return (
-    <div className="h-screen flex flex-col gap-4">
+    <div className="workspace-shell">
       <Header />
-      <Outlet />
+      <main className="workspace-main auth-workspace">
+        <Outlet />
+      </main>
     </div>
   );
 }

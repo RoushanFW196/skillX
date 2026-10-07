@@ -1,5 +1,15 @@
 import dotenv from "dotenv";
-dotenv.config();
+dotenv.config({ path: new URL("./.env", import.meta.url) });
+
+const missingSecrets = ["ACCESS_TOKEN_SECRET", "REFRESH_TOKEN_SECRET"].filter(
+  (key) => !process.env[key]?.trim(),
+);
+
+if (missingSecrets.length) {
+  throw new Error(
+    `Missing required environment variables: ${missingSecrets.join(", ")}. Configure them in server/.env before starting the server.`,
+  );
+}
 
 import express from "express";
 import cookieParser from "cookie-parser";

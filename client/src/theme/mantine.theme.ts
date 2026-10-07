@@ -1,4 +1,4 @@
-import { createTheme } from "@mantine/core";
+import { createTheme, type MantineColorsTuple } from "@mantine/core";
 
 /* ============================================================
    SKILLX MANTINE THEME
@@ -10,33 +10,33 @@ import { createTheme } from "@mantine/core";
    Mantine   → same names, 10 shades each (50 → 900)
    ============================================================ */
 
-const primary = [
-  "#eef2ff",
-  "#e0e7ff",
-  "#c7d2fe",
-  "#a5b4fc",
-  "#818cf8",
-  "#6366f1",
-  "#4f46e5",
-  "#4338ca",
-  "#3730a3",
-  "#312e81",
+const primary: MantineColorsTuple = [
+  "#f2f7ed",
+  "#e6efdc",
+  "#d1e2bf",
+  "#b2ce95",
+  "#8fb76c",
+  "#709c4f",
+  "#527a3b",
+  "#41622f",
+  "#365029",
+  "#2e4326",
 ];
 
-const secondary = [
-  "#f5f3ff",
-  "#ede9fe",
-  "#ddd6fe",
-  "#c4b5fd",
-  "#a78bfa",
-  "#8b5cf6",
-  "#7c3aed",
-  "#6d28d9",
-  "#5b21b6",
-  "#4c1d95",
+const secondary: MantineColorsTuple = [
+  "#eff9fa",
+  "#d6eff0",
+  "#b0dfe3",
+  "#7ac7cf",
+  "#42a9b6",
+  "#268d9b",
+  "#23717f",
+  "#225b68",
+  "#234c57",
+  "#22414b",
 ];
 
-const accent = [
+const accent: MantineColorsTuple = [
   "#fffbeb",
   "#fef3c7",
   "#fde68a",
@@ -49,7 +49,7 @@ const accent = [
   "#78350f",
 ];
 
-const success = [
+const success: MantineColorsTuple = [
   "#ecfdf5",
   "#d1fae5",
   "#a7f3d0",
@@ -62,7 +62,7 @@ const success = [
   "#064e3b",
 ];
 
-const danger = [
+const danger: MantineColorsTuple = [
   "#fff1f2",
   "#ffe4e6",
   "#fecdd3",
@@ -75,9 +75,9 @@ const danger = [
   "#881337",
 ];
 
-const warning = [...accent];
+const warning: MantineColorsTuple = [...accent];
 
-const info = [
+const info: MantineColorsTuple = [
   "#f0f9ff",
   "#e0f2fe",
   "#bae6fd",
@@ -95,7 +95,7 @@ const info = [
    dark-9 → body/Paper/Card bg  = neutral-900 (#18181b)
    dark-0 → text on dark        = neutral-50  (#fafafa)
    dark-4 → default borders     = neutral-700 (#3f3f46)  */
-const dark = [
+const dark: MantineColorsTuple = [
   "#fafafa", // 0  text
   "#f4f4f5", // 1  bright
   "#d4d4d8", // 2  dimmed text
@@ -111,13 +111,28 @@ const dark = [
 const extendedTheme = createTheme({
   colors: { primary, secondary, accent, success, danger, warning, info, dark },
   primaryColor: "primary",
-  primaryShade: 6, // → #4f46e5, matches Tailwind's primary-600
+  primaryShade: { light: 6, dark: 3 },
+  autoContrast: true,
   defaultRadius: "md",
   fontFamily:
-    "Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+    "DM Sans, sans-serif",
+  fontSizes: {
+    xs: "0.875rem",
+    sm: "0.9375rem",
+    md: "1rem",
+    lg: "1.125rem",
+    xl: "1.25rem",
+  },
+  lineHeights: {
+    xs: "1.5",
+    sm: "1.55",
+    md: "1.6",
+    lg: "1.6",
+    xl: "1.6",
+  },
   headings: {
     fontFamily:
-      "Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+      "DM Sans, sans-serif",
     fontWeight: "700",
   },
   components: {

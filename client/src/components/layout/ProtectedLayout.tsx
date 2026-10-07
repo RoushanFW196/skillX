@@ -1,16 +1,21 @@
-import { Outlet, Navigate } from "react-router";
+import { Outlet, Navigate, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { connectSocket } from "../../utils/socket.ts";
 import { Header } from "./Header.tsx";
+import type { UserProfile } from "../../store/atom";
 
 export function ProtectedLayout() {
-  const isloggedIn = true;
+  const location = useLocation();
+  const isloggedIn = Boolean(localStorage.getItem("accessToken"));
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("userInfo") || "null");
-    setUser(storedUser);
+    try {
+      setUser(JSON.parse(localStorage.getItem("userInfo") || "null"));
+    } catch {
+      setUser(null);
+    }
   }, []);
 
   useEffect(() => {
@@ -20,13 +25,21 @@ export function ProtectedLayout() {
   }, [user?._id]);
 
   if (!isloggedIn) {
-    return <Navigate to="/auth/login" />;
+    return (
+      <Navigate
+        to="/auth/login"
+        replace
+        state={{ from: location.pathname + location.search }}
+      />
+    );
   }
 
   return (
-    <div>
+    <div className="workspace-shell">
       <Header />
-      <Outlet />
+      <main className="workspace-main">
+        <Outlet />
+      </main>
     </div>
   );
 }

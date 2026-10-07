@@ -1,15 +1,13 @@
 import { Header } from "./Header.tsx";
-import { Footer } from "./Footer";
 import { Outlet } from "react-router";
 
 export function Layout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="workspace-shell">
       <Header />
-      <main className="flex-1">
-        <Outlet /> {/* ✅ THIS IS THE KEY */}
+      <main className="workspace-main">
+        <Outlet />
       </main>
-      <Footer />
     </div>
   );
 }

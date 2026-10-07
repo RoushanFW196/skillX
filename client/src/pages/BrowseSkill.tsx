@@ -30,7 +30,7 @@ function SkillCard({ skill }) {
   return (
     <Card
       shadow="sm"
-      radius="xl"
+      radius="md"
       p="md"
       withBorder
       style={{
@@ -77,6 +77,8 @@ export default function SkillPage() {
   const [search, setSearch] = useState("");
   const [opened, setOpened] = useState(false);
   const [allSkills, setAllSkills] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getAllSkills();
@@ -99,7 +101,7 @@ export default function SkillPage() {
 
     if (response.ok) {
       const createdSkill = await response.json();
-     // console.log("Created Skill:", createdSkill);
+      // console.log("Created Skill:", createdSkill);
       toast.success("Skill added successfully!");
       getAllSkills();
     } else {
@@ -108,20 +110,32 @@ export default function SkillPage() {
   };
 
   const getAllSkills = async () => {
-    // fetch all skills from all categories  from the backend and return as a single array
-
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/skills?category=${activeTab}`,
-    );
-    if (response.ok) {
+    setLoading(true);
+    setError("");
+    setAllSkills([]);
+    try {
+      if (!import.meta.env.VITE_API_BASE_URL)
+        throw new Error(
+          "The skill community is currently unavailable. Please try again later.",
+        );
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/skills?category=${activeTab}`,
+      );
+      if (!response.ok)
+        throw new Error("We couldn't load skills. Please try again.");
       const data = await response.json();
-      console.log("Fetched Skills:", data);
-      setAllSkills(data.skills);
+      setAllSkills(data.skills || []);
+    } catch (failure) {
+      setError(
+        failure instanceof Error ? failure.message : "We couldn't load skills.",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Container size="lg" py="xl" >
+    <Container size="lg" py="xl">
       {/* 🔹 Header */}
       <Group justify="space-between" mb="lg">
         <div>
@@ -173,7 +187,24 @@ export default function SkillPage() {
       />
 
       {/* 🔹 Skills Grid */}
-      {filteredSkills.length > 0 ? (
+      {loading ? (
+        <Center py="xl">
+          <Text c="dimmed" role="status">
+            Finding your next skill...
+          </Text>
+        </Center>
+      ) : error ? (
+        <Center py="xl">
+          <Stack align="center">
+            <Text role="alert" c="dimmed">
+              {error}
+            </Text>
+            <Button variant="light" onClick={getAllSkills}>
+              Try again
+            </Button>
+          </Stack>
+        </Center>
+      ) : filteredSkills.length > 0 ? (
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
           {filteredSkills.map((skill, i) => (
             <SkillCard key={i} skill={skill} />

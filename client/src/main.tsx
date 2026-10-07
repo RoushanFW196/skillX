@@ -26,6 +26,7 @@ const Home = Loadable(lazy(() => import("./pages/Home")));
 const Signup = Loadable(lazy(() => import("./pages/Signup")));
 const Login = Loadable(lazy(() => import("./pages/Login")));
 const Profile = Loadable(lazy(() => import("./pages/Profile")));
+const Dashboard = Loadable(lazy(() => import("./pages/Dashboard")));
 const AboutPage = Loadable(lazy(() => import("./pages/AboutPage.tsx")));
 const CommunityPage = Loadable(lazy(() => import("./pages/CommunityPage.tsx")));
 const MatchesPage = Loadable(lazy(() => import("./pages/MatchesPage.tsx")));
@@ -53,6 +54,8 @@ const router = createBrowserRouter([
     element: <ProtectedLayout />, // 🔒 protected
     errorElement: <ErrorPage />,
     children: [
+      { index: true, element: Dashboard },
+      { path: "overview", element: Dashboard },
       { path: "profile", element: Profile, errorElement: <ErrorPage /> },
       {
         path: "explore-skills",
@@ -103,11 +106,7 @@ const router = createBrowserRouter([
 function ThemedToasts() {
   const { colorScheme } = useMantineColorScheme();
   return (
-    <ToastContainer
-      position="top-right"
-      autoClose={2000}
-      theme={colorScheme}
-    />
+    <ToastContainer position="top-right" autoClose={2000} theme={colorScheme} />
   );
 }
 

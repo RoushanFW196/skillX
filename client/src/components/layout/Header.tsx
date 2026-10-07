@@ -1,276 +1,258 @@
+import { useEffect, useState } from "react";
+import {
+  ActionIcon,
+  Tooltip,
+  useComputedColorScheme,
+  useMantineColorScheme,
+} from "@mantine/core";
+import { Link, NavLink, useLocation, useNavigate } from "react-router";
+import {
+  BookOpen,
+  Bookmark,
+  ChevronDown,
+  Compass,
+  GraduationCap,
+  HelpCircle,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageCircle,
+  Moon,
+  Plus,
+  Sparkles,
+  Sun,
+  UserRound,
+  Users,
+  X,
+  Zap,
+} from "lucide-react";
 import { useAtom } from "jotai";
-import { motion } from "framer-motion";
-import { Zap, Menu, Sun, Moon, LogOut, User, Inbox } from "lucide-react";
-import { useEffect } from "react";
-import { useNavigate } from "react-router";
-import { useMediaQuery, useDisclosure } from "@mantine/hooks";
-import { loginAtom, userInfoAtom } from "../../store/atom.js";
-import { Avatar, Drawer, NavLink, Popover, useMantineColorScheme } from "@mantine/core";
-import { toast } from "react-toastify";
+import { loginAtom, userInfoAtom } from "../../store/atom";
 import { fetchUserInfo } from "../../utils/commonfunction.js";
 
 export function Header() {
-  // ✅ Dark mode is managed by Mantine (persists to localStorage and sets
-  //    data-mantine-color-scheme on <html>, which Tailwind's dark: reacts to)
-  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
-  const isDark = colorScheme === "dark";
-  const toggleTheme = toggleColorScheme;
-
-  const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
-  const navigate = useNavigate();
+  const colorScheme = useComputedColorScheme("light");
+  const { setColorScheme } = useMantineColorScheme();
+  const themeLabel =
+    colorScheme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useAtom(loginAtom);
   const [user, setUser] = useAtom(userInfoAtom);
-  const isMobile = useMediaQuery("(max-width: 768px)", true);
-  const [opened, { open, close }] = useDisclosure(false);
-
-  const handleStart = () => navigate("/auth/login");
-
+  const location = useLocation();
+  const navigate = useNavigate();
+  const savedView =
+    new URLSearchParams(location.search).get("view") === "saved";
+  useEffect(() => {
+    setMobileOpen(false);
+    setAccountOpen(false);
+  }, [location.pathname, location.search]);
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      setIsLoggedIn(true);
-      fetchUser();
-    }
-  }, []);
-
-  const fetchUser = async () => {
+    if (!token) return;
+    setIsLoggedIn(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
-      const data = await fetchUserInfo(decodedUser?.id);
-      setUser(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleLogout = async () => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/user/logout`,
-      { method: "POST", credentials: "include" },
-    );
-
-    if (res.ok) {
-      localStorage.removeItem("accessToken");
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      fetchUserInfo(payload.id)
+        .then((profile) => setUser(profile || null))
+        .catch(() => setUser(null));
+    } catch {
       setIsLoggedIn(false);
-      toast.success("Logged out successfully!");
+    }
+  }, [setIsLoggedIn, setUser]);
+  const logout = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/user/logout`,
+        { method: "POST", credentials: "include" },
+      );
+      if (!response.ok) return;
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("userInfo");
+      setIsLoggedIn(false);
+      setUser(null);
       navigate("/");
+    } catch {
+      navigate("/auth/login");
     }
   };
-
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-neutral-900/80 border-b dark:border-neutral-800">
-      {" "}
-      <nav className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* 🔥 Logo */}
-          <div
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 cursor-pointer"
+    <>
+      {mobileOpen && (
+        <button
+          className="sidebar-backdrop"
+          aria-label="Close navigation"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+      <aside
+        className={`workspace-sidebar ${mobileOpen ? "sidebar-open" : ""}`}
+      >
+        <Link className="workspace-brand" to="/">
+          <span className="brand-symbol">
+            <Zap size={21} fill="currentColor" />
+          </span>
+          skill<span className="brand-x">x</span>
+          <span className="brand-period">.</span>
+        </Link>
+        <button
+          className="mobile-close"
+          aria-label="Close navigation"
+          onClick={() => setMobileOpen(false)}
+        >
+          <X size={20} />
+        </button>
+        <div className="workspace-label">YOUR LEARNING SPACE</div>
+        <nav className="workspace-nav" aria-label="Main navigation">
+          <NavLink to="/app/overview">
+            <LayoutDashboard size={19} /> Overview
+          </NavLink>
+          <Link
+            className={
+              (location.pathname === "/" && !savedView) ||
+              location.pathname.includes("explore-skills") ||
+              location.pathname.includes("/skills/")
+                ? "active"
+                : ""
+            }
+            to="/"
           >
-            <div className="w-8 h-8 bg-brand-gradient rounded-lg flex items-center justify-center shadow-soft">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-bold text-neutral-900 dark:text-white">
-              SkillX
+            <Compass size={19} /> Explore skills{" "}
+            <span className="nav-new">NEW</span>
+          </Link>
+          <NavLink to="/app/matches">
+            <Sparkles size={19} /> My matches
+          </NavLink>
+          <NavLink to="/app/chat">
+            <MessageCircle size={19} /> Messages
+          </NavLink>
+          <Link className={savedView ? "active" : ""} to="/?view=saved">
+            <Bookmark size={19} /> Saved skills
+          </Link>
+        </nav>
+        <div className="workspace-label community-label">GROW TOGETHER</div>
+        <nav className="workspace-nav" aria-label="Community navigation">
+          <NavLink to="/app/community">
+            <Users size={19} /> Community
+          </NavLink>
+          <NavLink to="/app/profile">
+            <BookOpen size={19} /> My skills
+          </NavLink>
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="credit-summary">
+            <span className="credit-icon">
+              <Zap size={18} />
             </span>
-          </div>
-
-          {/* ✅ Desktop Nav */}
-          {!isMobile && (
-            <div className="flex items-center gap-4  justify-center">
-              <NavLink label="Browse Skills" href="/app/explore-skills" />
-              <NavLink label="Matches"  href="/app/matches" />
-              <NavLink label="Community"  href="/app/community" />
-              <NavLink label="About" href="/app/about" />
+            <div>
+              <strong>Knowledge is currency.</strong>
+              <p>Teach a little. Learn a lot.</p>
             </div>
-          )}
-
-          {/* ✅ Desktop Right */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Theme */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
-            {isloggedIn ? (
-              <Popover width={200} position="bottom" withArrow shadow="md">
-                <Popover.Target>
-                  <Avatar src={user?.profilePic || null} />
-                </Popover.Target>
-
-                <Popover.Dropdown>
-                  <button
-                    onClick={() => navigate("/app/profile")}
-                    className="flex gap-2 w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
-                  >
-                    <User size={16} /> Profile
-                  </button>
-
-                  <button
-                    onClick={() => navigate("/app/chat")}
-                    className="flex gap-2 w-full p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded"
-                  >
-                    <Inbox size={16} /> Messages
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex gap-2 w-full p-2 text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-950/40 rounded"
-                  >
-                    <LogOut size={16} /> Logout
-                  </button>
-                </Popover.Dropdown>
-              </Popover>
-            ) : (
-              <button
-                onClick={handleStart}
-                className="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors shadow-soft"
-              >
-                Get Started
-              </button>
-            )}
           </div>
-
-          {isMobile && (
-            <div className="flex items-center">
-              <button onClick={toggleTheme} className="mr-3">
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          <Link className="sidebar-share" to="/app/profile">
+            <Plus size={16} /> Share a skill
+          </Link>
+          <Link className="sidebar-help" to="/app/about">
+            <HelpCircle size={17} /> About SkillX <ArrowIcon />
+          </Link>
+          <div className="sidebar-user">
+            <span className="user-initial">{user?.name?.charAt(0) || "S"}</span>
+            <div>
+              <strong>{user?.name || "Hello, curious mind"}</strong>
+              <p>
+                {isLoggedIn ? "Keep growing" : "Your next chapter starts here"}
+              </p>
+            </div>
+            <GraduationCap size={20} />
+          </div>
+        </div>
+      </aside>
+      <header className="workspace-topbar">
+        <div className="topbar-left">
+          <button
+            className="mobile-menu"
+            aria-label="Open navigation"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu size={22} />
+          </button>
+          <span className="breadcrumb">
+            Your workspace <span>/</span>{" "}
+            <strong>
+              {savedView
+                ? "Saved skills"
+                : location.pathname === "/"
+                  ? "Explore skills"
+                  : location.pathname.includes("chat")
+                    ? "Messages"
+                    : location.pathname.includes("matches")
+                      ? "My matches"
+                      : location.pathname.includes("profile")
+                        ? "My profile"
+                        : location.pathname.includes("community")
+                          ? "Community"
+                          : "Explore"}
+            </strong>
+          </span>
+        </div>
+        <div className="topbar-right">
+          <span className="topbar-note">
+            <span className="status-dot" /> Stay curious. Keep growing.
+          </span>
+          <Tooltip label={themeLabel}>
+            <ActionIcon
+              variant="subtle"
+              color="primary"
+              size={40}
+              radius="md"
+              aria-label={themeLabel}
+              onClick={() =>
+                setColorScheme(colorScheme === "dark" ? "light" : "dark")
+              }
+            >
+              {colorScheme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </ActionIcon>
+          </Tooltip>
+          {!isLoggedIn ? (
+            <Link className="header-signin" to="/auth/login">
+              Log in <Zap size={14} />
+            </Link>
+          ) : (
+            <div className="account-control">
+              <button
+                className="account-button"
+                onClick={() => setAccountOpen(!accountOpen)}
+                aria-label="Account menu"
+                aria-expanded={accountOpen}
+              >
+                <span className="user-initial">
+                  {user?.name?.charAt(0) || "S"}
+                </span>
+                <ChevronDown size={14} />
               </button>
-
-              <button onClick={open}>
-                <Menu size={22} />
-              </button>
+              {accountOpen && (
+                <div className="account-menu">
+                  <Link to="/app/profile">
+                    <UserRound size={15} /> My profile
+                  </Link>
+                  <button onClick={logout}>
+                    <LogOut size={15} /> Log out
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
-      </nav>
-      {isMobile && (
-        <Drawer
-          opened={opened}
-          onClose={close}
-          position="right"
-          size="85%"
-          padding="0"
-          overlayProps={{ opacity: 0.4, blur: 6 }}
-        >
-          <motion.div
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 100, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 25 }}
-            className="flex flex-col h-full bg-white dark:bg-neutral-900"
-          >
-            {/* 👤 USER HEADER */}
-            {isloggedIn && (
-              <div className="flex items-center gap-3 p-5 border-b dark:border-neutral-800">
-                <Avatar src={user?.profilePic || null} size="lg" />
-                <div>
-                  <p className="font-semibold text-sm">
-                    {user?.name || "User"}
-                  </p>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">Welcome back 👋</p>
-                </div>
-              </div>
-            )}
+      </header>
+    </>
+  );
+}
 
-            {/* 📌 NAV LINKS */}
-            <div className="flex flex-col p-4 gap-2">
-              {[
-                {
-                  label: "Browse Skills",
-                  icon: <Zap size={18} />,
-                  path: "/app/explore-skills",
-                },
-                {
-                  label: "Matches",
-                  icon: <User size={18} />,
-                  path: "/app/matches",
-                },
-                {
-                  label: "Community",
-                  icon: <Inbox size={18} />,
-                  path: "/app/community",
-                },
-                { label: "About", icon: <User size={18} />, path: "/about" },
-              ].map((item) => (
-                <motion.button
-                  key={item.label}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => {
-                    navigate(item.path);
-                    close();
-                  }}
-                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 transition"
-                >
-                  <span className="text-primary-600">{item.icon}</span>
-                  <span className="font-medium text-sm">{item.label}</span>
-                </motion.button>
-              ))}
-            </div>
-
-            {/* ⚙️ SETTINGS + ACTIONS */}
-            <div className="mt-auto p-4 border-t flex flex-col gap-2">
-              {/* Theme */}
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                onClick={toggleTheme}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
-              >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                <span className="text-sm font-medium">Toggle Theme</span>
-              </motion.button>
-
-              {isloggedIn ? (
-                <>
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      navigate("/app/profile");
-                      close();
-                    }}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
-                  >
-                    <User size={18} />
-                    <span className="text-sm font-medium">Profile</span>
-                  </motion.button>
-
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      navigate("/app/chat");
-                      close();
-                    }}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition"
-                  >
-                    <Inbox size={18} />
-                    <span className="text-sm font-medium">Messages</span>
-                  </motion.button>
-
-                  <motion.button
-                    whileTap={{ scale: 0.96 }}
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-danger-50 dark:hover:bg-danger-950/40 text-danger-600 transition"
-                  >
-                    <LogOut size={18} />
-                    <span className="text-sm font-medium">Logout</span>
-                  </motion.button>
-                </>
-              ) : (
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={handleStart}
-                  className="bg-primary-600 text-white py-3 rounded-xl text-sm font-semibold"
-                >
-                  Get Started
-                </motion.button>
-              )}
-            </div>
-          </motion.div>
-        </Drawer>
-      )}
-    </header>
+function ArrowIcon() {
+  return (
+    <ChevronDown
+      size={14}
+      style={{ marginLeft: "auto", transform: "rotate(-135deg)" }}
+    />
   );
 }

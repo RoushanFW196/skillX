@@ -1,381 +1,473 @@
-import {
-  Avatar,
-  Button,
-  Card,
-  Text,
-  Badge,
-  Group,
-  Stack,
-  Divider,
-  Grid,
-  ThemeIcon,
-  Box,
-} from "@mantine/core";
-import React, { useState, useEffect } from "react";
-import {
-  Pencil,
-  Coins,
-  Star,
-  MessageSquare,
-  HandHeart,
-  Target,
-  PersonStanding,
-  Mountain,
-  Cake,
-  Waves,
-} from "lucide-react";
-import { fetchUserInfo } from "../utils/commonfunction.js";
-import { FileButton, ActionIcon, Loader } from "@mantine/core";
-import EditProfileModal from "./EditProfileModal.tsx";
+import { useEffect, useState } from "react";
+import { ActionIcon, Avatar, FileButton, Loader, Tooltip } from "@mantine/core";
+import { Link } from "react-router";
 import { useAtom } from "jotai";
-import { loginAtom, userInfoAtom } from "../store/atom.js";
+import {
+  ArrowRight,
+  BookOpen,
+  Camera,
+  Check,
+  Clock,
+  Coins,
+  GraduationCap,
+  Mail,
+  MessageSquare,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Star,
+  UserRound,
+} from "lucide-react";
 import { toast } from "react-toastify";
+import { fetchUserInfo } from "../utils/commonfunction.js";
+import { loginAtom, userInfoAtom, type UserProfile } from "../store/atom";
+import EditProfileModal, { type EditProfileValues } from "./EditProfileModal";
 
 export default function ProfilePage() {
   const [opened, setOpened] = useState(false);
-  const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
-  const [user, setUser] = useAtom(userInfoAtom);
-  const [profile, setProfile] = useState(null as any);
-  const [skillsList, setSkillsList] = useState([]);
+  const [, setIsLoggedIn] = useAtom(loginAtom);
+  const [, setUser] = useAtom(userInfoAtom);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [skillsList, setSkillsList] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [skillsError, setSkillsError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [uploading, setUploading] = useState(false);
-  // Mock icon mapping for skills - in a real app, you might store icon names in DB
-  const getSkillIcon = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes("walking")) return <PersonStanding size={14} />;
-    if (n.includes("trekking")) return <Mountain size={14} />;
-    if (n.includes("pastry")) return <Cake size={14} />;
-    if (n.includes("swimming")) return <Waves size={14} />;
-    return null;
-  };
 
-  const fetchSkills = async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/skills/all`,
-      );
-      const data = await res.json();
-      const modifiedskill = data.skills.map((skill: any) => ({
-        value: skill._id,
-        label: skill.name,
-      }));
-      setSkillsList(modifiedskill);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleSave = async (updatedData: any) => {
-    try {
-      if (JSON.stringify(updatedData) === JSON.stringify(profile)) {
-        toast.info("No changes made");
-        return;
+  useEffect(() => {
+    let active = true;
+    const loadProfile = async () => {
+      setLoading(true);
+      setError("");
+      setSkillsError(false);
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) throw new Error("Sign in again to view your profile.");
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (!payload.id)
+          throw new Error("Your session is invalid. Please sign in again.");
+        setIsLoggedIn(true);
+        const [data, options] = await Promise.all([
+          fetchUserInfo(payload.id),
+          fetch(`${import.meta.env.VITE_API_BASE_URL}/skills/all`)
+            .then(async (response) => {
+              if (!response.ok) throw new Error("Skill catalog unavailable");
+              const result = await response.json();
+              return (result.skills || []).map(
+                (skill: { _id: string; name: string }) => ({
+                  value: skill._id,
+                  label: skill.name,
+                }),
+              );
+            })
+            .catch(() => {
+              if (active) setSkillsError(true);
+              return [];
+            }),
+        ]);
+        if (!data)
+          throw new Error("We couldn't load your profile. Please try again.");
+        if (active) {
+          setProfile(data);
+          setUser(data);
+          setSkillsList(options);
+        }
+      } catch (failure) {
+        if (active)
+          setError(
+            failure instanceof Error
+              ? failure.message
+              : "Unable to load your profile.",
+          );
+      } finally {
+        if (active) setLoading(false);
       }
-      const token = localStorage.getItem("accessToken");
-      const userId = profile._id || user?._id;
+    };
+    void loadProfile();
+    return () => {
+      active = false;
+    };
+  }, [retry, setIsLoggedIn, setUser]);
+
+  const updateProfile = (data: UserProfile) => {
+    setProfile(data);
+    setUser(data);
+    localStorage.setItem("userInfo", JSON.stringify(data));
+  };
+
+  const handleSave = async (updatedData: EditProfileValues) => {
+    if (!profile) return false;
+    try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/user/profile/${userId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/user/profile/${profile._id}`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify(updatedData),
         },
       );
-
-      const respdata = await response.json();
-      const data = respdata.data;
-      if (!response.ok)
-        throw new Error(data.message || "Failed to update profile");
-
-      setProfile(data);
-      toast.success("Profile updated successfully 🎉");
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
-    }
-  };
-
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      setIsLoggedIn(true);
-      fetchUser();
-      fetchSkills();
-    } else {
-      setIsLoggedIn(false);
-    }
-  }, []);
-
-  const fetchUser = async () => {
-    const token = localStorage.getItem("accessToken");
-    try {
-      const decodedUser = JSON.parse(atob(token?.split(".")[1] || ""));
-      const data = await fetchUserInfo(decodedUser?.id);
-    //  console.log("Fetched user info in header:", data);
-      setUser(data);
-      setProfile(data); // Set profile state with fetched user info
-    } catch (error) {
-      console.error("Error fetching user info:", error);
+      const result = await response.json();
+      if (!response.ok || !result.data)
+        throw new Error(result.message || "Failed to update profile");
+      updateProfile(result.data);
+      toast.success("Profile updated successfully");
+      return true;
+    } catch (failure) {
+      toast.error(
+        failure instanceof Error ? failure.message : "Failed to update profile",
+      );
+      return false;
     }
   };
 
   const handleUpload = async (file: File | null) => {
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("profilePic", file); // Ensure "profilePic" matches your backend field name
-
+    if (!file || !profile) return;
+    if (
+      !["image/png", "image/jpeg"].includes(file.type) ||
+      file.size > 5 * 1024 * 1024
+    ) {
+      toast.error("Choose a JPG or PNG photo smaller than 5 MB.");
+      return;
+    }
     setUploading(true);
     try {
-      const token = localStorage.getItem("accessToken");
-      const userId = profile._id || user?._id;
-
+      const formData = new FormData();
+      formData.append("profilePic", file);
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/user/profile/upload-pic/${userId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/user/profile/upload-pic/${profile._id}`,
         {
-          method: "POST", // Or PATCH, depending on your API
+          method: "POST",
+          credentials: "include",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: formData,
         },
       );
-
       const result = await response.json();
-      if (response.ok) {
-        // Update the profile state with the new image URL returned by the server
-        setProfile({ ...profile, profilePic: result.data.profilePic });
-        setUser(result.data); // Update user info in global state if needed
-        toast.success("Photo updated! 📸");
-      } else {
-        throw new Error(result.message || "Upload failed");
-      }
-    } catch (error: any) {
-      toast.error(error.message);
+      if (!response.ok || !result.data?.profilePic)
+        throw new Error(result.message || "Photo upload failed");
+      updateProfile({ ...profile, profilePic: result.data.profilePic });
+      toast.success("Profile photo updated");
+    } catch (failure) {
+      toast.error(
+        failure instanceof Error ? failure.message : "Photo upload failed",
+      );
     } finally {
       setUploading(false);
     }
   };
+
+  if (loading)
+    return (
+      <div className="profile-status" role="status">
+        <Loader size="md" />
+        <p>Loading your profile...</p>
+      </div>
+    );
+  if (error || !profile)
+    return (
+      <div className="profile-status" role="alert">
+        <UserRound size={32} />
+        <h1>Your profile is unavailable</h1>
+        <p>{error || "Please try again."}</p>
+        <button
+          className="dark-action"
+          onClick={() => setRetry((value) => value + 1)}
+        >
+          <RefreshCw size={16} /> Try again
+        </button>
+        <Link className="text-link" to="/auth/login">
+          Sign in again <ArrowRight size={16} />
+        </Link>
+      </div>
+    );
+
+  const steps = [
+    {
+      label: "Add a profile photo",
+      complete: Boolean(profile.profilePic),
+      photo: true,
+    },
+    {
+      label: "Write a short introduction",
+      complete: Boolean(profile.bio?.trim()),
+      photo: false,
+    },
+    {
+      label: "Choose a skill to teach",
+      complete: Boolean(profile.skillsOffered?.length),
+      photo: false,
+    },
+    {
+      label: "Choose a skill to learn",
+      complete: Boolean(profile.skillsToLearn?.length),
+      photo: false,
+    },
+  ];
+  const progress = steps.filter((step) => step.complete).length * 25;
+  const initials = (profile.name || "Your profile")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+  const availableSkills = [
+    ...new Map(
+      [
+        ...skillsList,
+        ...(profile.skillsOffered || []).map((skill) => ({
+          value: skill._id,
+          label: skill.name,
+        })),
+        ...(profile.skillsToLearn || []).map((skill) => ({
+          value: skill._id,
+          label: skill.name,
+        })),
+      ].map((skill) => [skill.value, skill]),
+    ).values(),
+  ];
+
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <Card
-        radius="lg"
-        shadow="md"
-        p={40}
-        withBorder
-        style={{
-          backgroundColor: "var(--mantine-color-body)",
-          backgroundImage:
-            "radial-gradient(var(--mantine-color-default-border) 0.5px, transparent 0.5px)",
-          backgroundSize: "20px 20px",
-        }}
-      >
-        {/* HEADER */}
-        <Group justify="space-between" align="center">
-          <Group gap="xl">
-            <Box style={{ position: "relative" }}>
-              <FileButton onChange={handleUpload} accept="image/png,image/jpeg">
-                {(props) => (
-                  <Avatar
-                    {...props}
-                    src={profile?.profilePic || null}
-                    size={110}
-                    radius="100%"
-                    style={{
-                      cursor: "pointer",
-                      border: "4px solid var(--mantine-color-body)",
-                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      transition: "filter 0.3s",
-                    }}
-                    className="hover:brightness-90"
-                  />
-                )}
-              </FileButton>
-
-              {/* SHOW LOADER OVER AVATAR DURING UPLOAD */}
-              {uploading && (
-                <Box
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "rgba(255,255,255,0.5)",
-                    borderRadius: "100%",
-                  }}
-                >
-                  <Loader size="sm" />
-                </Box>
-              )}
-            </Box>
-
-            <Stack gap={2}>
-              <Text size="26px" fw={800}>
-                {profile?.name}
-              </Text>
-              <Text size="md" c="dimmed" mb={5}>
-                {profile?.email}
-              </Text>
-              <Badge
-                variant="light"
-                color="primary"
-                fw={700}
-                size="lg"
-                radius="sm"
-              >
-                + {profile?.yearsOfExperience} YRS EXPERIENCE
-              </Badge>
-            </Stack>
-          </Group>
-
-          <Button
-            variant="outline"
-            leftSection={<Pencil size={16} />}
-            onClick={() => setOpened(true)}
-            radius="md"
-            size="md"
-            color="primary"
-            styles={{ root: { borderWidth: "2px", fontWeight: 600 } }}
+    <div className="discover-page profile-page">
+      <div className="page-heading">
+        <div>
+          <div className="eyebrow">
+            <span /> YOUR LEARNING IDENTITY
+          </div>
+          <h1>My profile</h1>
+          <p>The knowledge you share. The things you're curious about.</p>
+        </div>
+        <button
+          className="profile-edit-button outline-action"
+          onClick={() => setOpened(true)}
+        >
+          <Pencil size={17} />
+          <span>Edit profile</span>
+        </button>
+      </div>
+      <section className="profile-identity" aria-label="Profile details">
+        <div className="profile-photo">
+          <Avatar
+            src={profile.profilePic || null}
+            size={104}
+            radius={16}
+            alt={profile.name || "Profile photo"}
           >
-            Edit Profile
-          </Button>
-        </Group>
-
-        {/* BIO */}
-        <Text mt={25} size="lg" c="dimmed" fw={500}>
-          {profile?.bio}
-        </Text>
-
-        {/* STATS SECTION */}
-        <Grid mt={30} gutter="md">
+            {initials}
+          </Avatar>
+          <FileButton onChange={handleUpload} accept="image/png,image/jpeg">
+            {(props) => (
+              <Tooltip label="Change profile photo">
+                <ActionIcon
+                  {...props}
+                  className="profile-photo-button"
+                  size={36}
+                  variant="filled"
+                  disabled={uploading}
+                  aria-label="Change profile photo"
+                >
+                  {uploading ? (
+                    <Loader size={17} color="white" />
+                  ) : (
+                    <Camera size={17} />
+                  )}
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </FileButton>
+        </div>
+        <div className="profile-name">
+          <span className="profile-member-label">
+            <UserRound size={15} /> SkillX member
+          </span>
+          <h2>{profile.name || "Your name"}</h2>
+          <p>
+            <Mail size={16} /> {profile.email || "No email added"}
+          </p>
+        </div>
+        <div className="profile-experience">
+          <Clock size={20} />
+          <strong>{profile.yearsOfExperience ?? 0} years</strong>
+          <span>of experience</span>
+        </div>
+      </section>
+      <dl className="profile-stats">
+        <div>
+          <dt>
+            <Coins size={18} /> Available credits
+          </dt>
+          <dd>{profile.credits ?? 0}</dd>
+        </div>
+        <div>
+          <dt>
+            <Star size={18} /> Community rating
+          </dt>
+          <dd>
+            {profile.ratingAvg ? profile.ratingAvg.toFixed(1) : "Not rated"}
+            <span>{profile.ratingCount ?? 0} reviews</span>
+          </dd>
+        </div>
+        <div>
+          <dt>
+            <BookOpen size={18} /> Skills to teach
+          </dt>
+          <dd>{profile.skillsOffered?.length ?? 0}</dd>
+        </div>
+        <div>
+          <dt>
+            <GraduationCap size={18} /> Learning interests
+          </dt>
+          <dd>{profile.skillsToLearn?.length ?? 0}</dd>
+        </div>
+      </dl>
+      <div className="profile-columns">
+        <div className="profile-main-content">
+          <section className="profile-section">
+            <div className="section-title">
+              <h2>A little about me</h2>
+            </div>
+            {profile.bio?.trim() ? (
+              <p className="profile-bio">{profile.bio}</p>
+            ) : (
+              <div className="profile-empty">
+                <p>No introduction yet.</p>
+                <button className="text-link" onClick={() => setOpened(true)}>
+                  Add an introduction <Pencil size={15} />
+                </button>
+              </div>
+            )}
+          </section>
           {[
             {
-              label: "Credits",
-              value: profile?.credits || 0,
-              icon: <Coins size={20} />,
-              color: "primary",
+              title: "What I can teach",
+              skills: profile.skillsOffered || [],
+              icon: BookOpen,
+              kind: "teaching",
+              empty: "Your first teaching skill belongs here.",
+              action: "Add teaching skills",
             },
             {
-              label: "Rating",
-              value: profile?.ratingAvg || "—",
-              icon: <Star size={20} />,
-              color: "accent",
+              title: "What I'd love to learn",
+              skills: profile.skillsToLearn || [],
+              icon: GraduationCap,
+              kind: "learning",
+              empty: "What would you like to explore next?",
+              action: "Add learning interests",
             },
-            {
-              label: "Reviews",
-              value: profile?.ratingCount || 0,
-              icon: <MessageSquare size={20} />,
-              color: "success",
-            },
-          ].map((stat, idx) => (
-            <Grid.Col key={idx} span={4}>
-              <Card
-                withBorder
-                radius="md"
-                p="lg"
-                style={{
-                  borderLeft: `4px solid var(--mantine-color-${stat.color}-6)`,
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: "20px",
-                }}
-              >
-                <ThemeIcon
-                  size={48}
-                  radius="md"
-                  variant="light"
-                  color={stat.color}
-                >
-                  {stat.icon}
-                </ThemeIcon>
-                <Stack gap={0} align="center" style={{ flex: 1 }}>
-                  <Text fw={800} size="28px">
-                    {stat.value}
-                  </Text>
-                  <Text
-                    size="sm"
-                    fw={600}
-                    c="dimmed"
-                    style={{ letterSpacing: "0.5px" }}
+          ].map((section) => (
+            <section
+              className={`profile-section profile-${section.kind}`}
+              key={section.kind}
+            >
+              <div className="section-title">
+                <h2>
+                  <section.icon size={21} /> {section.title}
+                </h2>
+                <Tooltip label={`Manage ${section.kind} skills`}>
+                  <ActionIcon
+                    variant="subtle"
+                    size={36}
+                    aria-label={`Manage ${section.kind} skills`}
+                    onClick={() => setOpened(true)}
                   >
-                    {stat.label}
-                  </Text>
-                </Stack>
-              </Card>
-            </Grid.Col>
+                    <Plus size={19} />
+                  </ActionIcon>
+                </Tooltip>
+              </div>
+              {section.skills.length ? (
+                <ul className="profile-skill-list">
+                  {section.skills.map((skill) => (
+                    <li key={skill._id}>
+                      <Link to={`/app/skills/${skill._id}`}>
+                        <span className="profile-skill-icon">
+                          <section.icon size={20} />
+                        </span>
+                        <span>{skill.name}</span>
+                        <ArrowRight size={17} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="profile-empty">
+                  <p>{section.empty}</p>
+                  <button className="text-link" onClick={() => setOpened(true)}>
+                    <Plus size={16} /> {section.action}
+                  </button>
+                </div>
+              )}
+            </section>
           ))}
-        </Grid>
-
-        <Divider my={35} color="#e2e8f0" />
-
-        {/* SKILLS SECTION */}
-        <Grid>
-          <Grid.Col span={6}>
-            <Group gap="xs" mb="md">
-              <HandHeart size={20} color="#4f46e5" />
-              <Text fw={800} size="lg">
-                Skills Offered
-              </Text>
-            </Group>
-
-            <Group gap="xs">
-              {profile?.skillsOffered?.map((skill: any) => (
-                <Badge
-                  key={skill._id}
-                  size="xl"
-                  radius="xl"
-                  color="primary"
-                  variant="filled"
-                  leftSection={getSkillIcon(skill.name)}
-                  // styles={{
-                  //   root: { padding: "18px 20px", textTransform: "uppercase" },
-                  // }}
-                >
-                  {skill.name}
-                </Badge>
+        </div>
+        <aside className="profile-aside">
+          <section className="profile-section">
+            <div className="section-title">
+              <h2>Profile completeness</h2>
+              <span className="progress-number">{progress}%</span>
+            </div>
+            <progress
+              className="profile-progress"
+              value={progress}
+              max={100}
+              aria-label="Profile completeness"
+            />
+            <ul className="profile-completion-list">
+              {steps.map((step) => (
+                <li key={step.label}>
+                  <span
+                    className={step.complete ? "step-done" : "step-pending"}
+                  >
+                    {step.complete ? <Check size={14} /> : <Plus size={14} />}
+                  </span>
+                  {step.photo ? (
+                    <FileButton
+                      onChange={handleUpload}
+                      accept="image/png,image/jpeg"
+                    >
+                      {(props) => (
+                        <button {...props} disabled={uploading}>
+                          {step.label}
+                        </button>
+                      )}
+                    </FileButton>
+                  ) : (
+                    <button onClick={() => setOpened(true)}>
+                      {step.label}
+                    </button>
+                  )}
+                  {step.complete && <span className="sr-only">Complete</span>}
+                </li>
               ))}
-            </Group>
-          </Grid.Col>
-
-          <Grid.Col span={6}>
-            <Group gap="xs" mb="md">
-              <Target size={20} color="#059669" />
-              <Text fw={800} size="lg">
-                Skills Wanted
-              </Text>
-            </Group>
-
-            <Group gap="xs">
-              {profile?.skillsToLearn?.map((skill: any) => (
-                <Badge
-                  key={skill._id}
-                  size="xl"
-                  radius="xl"
-                  color="success"
-                  variant="light"
-                  leftSection={getSkillIcon(skill.name)}
-                >
-                  {skill.name}
-                </Badge>
-              ))}
-            </Group>
-          </Grid.Col>
-        </Grid>
-      </Card>
-
-      {/* MODAL */}
-      {opened && (
-        <EditProfileModal
-          opened={opened}
-          onClose={() => setOpened(false)}
-          profile={profile}
-          skillsList={skillsList}
-          onSave={handleSave}
-        />
-      )}
+            </ul>
+          </section>
+          <section className="profile-section profile-next-step">
+            <GraduationCap size={27} />
+            <h2>Your next exchange</h2>
+            <Link className="text-link" to="/app/matches">
+              Find a learning partner <ArrowRight size={17} />
+            </Link>
+            <Link className="text-link" to="/app/chat">
+              <MessageSquare size={17} /> Open messages
+            </Link>
+          </section>
+        </aside>
+      </div>
+      <EditProfileModal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        profile={profile}
+        skillsList={availableSkills}
+        skillsError={skillsError}
+        onSave={handleSave}
+      />
     </div>
   );
 }

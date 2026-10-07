@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useAtom } from "jotai";
 import { loginAtom, userInfoAtom } from "../store/atom.js";
 import { toast } from "react-toastify";
@@ -10,8 +10,10 @@ export default function Login() {
     email: "",
     password: "",
   });
-  const [isloggedIn, setIsLoggedIn] = useAtom(loginAtom);
-  const [user, setUser] = useAtom(userInfoAtom);
+  const [, setIsLoggedIn] = useAtom(loginAtom);
+  const [, setUser] = useAtom(userInfoAtom);
+  const [submitting, setSubmitting] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,6 +22,8 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/user/login`,
@@ -38,15 +42,21 @@ export default function Login() {
         localStorage.setItem("accessToken", data.user.accessToken);
         localStorage.setItem("userInfo", JSON.stringify(data.user));
         toast.success("Login successful!");
-        setTimeout(() => {
-          navigate("/");
-        }, 2000); // Delay navigation to show toast
+        const destination = location.state?.from;
+        navigate(
+          typeof destination === "string" && destination.startsWith("/app")
+            ? destination
+            : "/app/overview",
+          { replace: true },
+        );
       } else {
         toast.error(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Login Error:", error);
       toast.error("Login failed. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -72,13 +82,17 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email */}
           <div>
-            <label className="text-sm font-medium text-neutral-700">
+            <label
+              htmlFor="login-email"
+              className="text-sm font-medium text-neutral-700"
+            >
               Email
             </label>
             <div className="input-with-icon focus-within:ring-primary-500/30">
               <Mail className="w-4 h-4 text-neutral-400" />
               <input
                 type="email"
+                id="login-email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
@@ -91,13 +105,17 @@ export default function Login() {
 
           {/* Password */}
           <div>
-            <label className="text-sm font-medium text-neutral-700">
+            <label
+              htmlFor="login-password"
+              className="text-sm font-medium text-neutral-700"
+            >
               Password
             </label>
             <div className="input-with-icon focus-within:ring-primary-500/30">
               <Lock className="w-4 h-4 text-neutral-400" />
               <input
                 type="password"
+                id="login-password"
                 name="password"
                 value={form.password}
                 onChange={handleChange}
@@ -108,22 +126,13 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Forgot Password */}
-          <div className="flex justify-end">
-            <button
-              type="button"
-              className="text-sm text-primary-600 hover:underline font-medium"
-            >
-              Forgot Password?
-            </button>
-          </div>
-
           {/* Submit */}
           <button
             type="submit"
+            disabled={submitting}
             className="bg-brand-gradient w-full py-2.5 rounded-lg text-white font-semibold shadow-soft hover:shadow-medium hover:scale-[1.01] transition-all"
           >
-            Login
+            {submitting ? "Signing in..." : "Log in"}
           </button>
         </form>
 
@@ -135,7 +144,11 @@ export default function Login() {
         </div>
 
         {/* Social Login */}
-        <button className="w-full border border-neutral-200 dark:border-neutral-700 py-2.5 rounded-lg text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 transition flex items-center justify-center gap-2">
+        <button
+          disabled
+          title="Google sign-in is not connected yet"
+          className="w-full border border-neutral-200 dark:border-neutral-700 py-2.5 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed flex items-center justify-center gap-2"
+        >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
@@ -154,7 +167,7 @@ export default function Login() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Continue with Google
+          Google sign-in coming soon
         </button>
 
         {/* Footer */}
